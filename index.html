@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1365 자원봉사 2단계 파이프라인 Explorer & 대시보드</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <script src="area_mapper.js"></script>
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --bg-card: #1e293b;
+      --bg-card-hover: #334155;
+      --bg-input: #0f172a;
+      --accent-blue: #3b82f6;
+      --accent-purple: #8b5cf6;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+      --glass-bg: rgba(30, 41, 59, 0.75);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --radius: 12px;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      background-image:
+        radial-gradient(at 10% 10%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
+        radial-gradient(at 90% 90%, rgba(139, 92, 246, 0.15) 0px, transparent 50%);
+      background-attachment: fixed;
+    }
+
+    header {
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--glass-border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 1rem 2rem;
+    }
+
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #fff;
+      font-size: 1.25rem;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .badge-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--accent-emerald);
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.825rem;
+      font-weight: 500;
+    }
+
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--accent-emerald);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent-emerald);
+    }
+
+    main {
+      max-width: 1400px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 1024px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    .panel-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #f1f5f9;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.75rem;
+    }
+
+    .step-badge {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--accent-blue);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .form-group {
+      margin-bottom: 1.1rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .form-control {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.65rem 0.85rem;
+      color: var(--text-main);
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      padding: 0.75rem;
+      border-radius: 8px;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      color: var(--text-main);
+      cursor: pointer;
+    }
+
+    .checkbox-label input[type="checkbox"] {
+      accent-color: var(--accent-blue);
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      border: none;
+      color: white;
+      padding: 0.85rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    }
+
+    .results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .results-tabs {
+      display: flex;
+      gap: 0.5rem;
+      background: var(--bg-input);
+      padding: 0.3rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 0.4rem 0.85rem;
+      border-radius: 6px;
+      font-size: 0.825rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--accent-blue);
+      color: white;
+    }
+
+    .tab-btn.active-bookmark {
+      background: var(--accent-amber);
+      color: #000;
+      font-weight: 700;
+    }
+
+    .tab-btn.active-hidden {
+      background: var(--accent-rose);
+      color: white;
+      font-weight: 700;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .item-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .item-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent-blue);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .item-card.bookmarked {
+      border-color: var(--accent-amber);
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.15);
+    }
+
+    .bookmark-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.1rem;
+      transition: all 0.2s;
+      z-index: 5;
+    }
+
+    .bookmark-btn:hover {
+      transform: scale(1.15);
+      color: var(--accent-amber);
+      border-color: var(--accent-amber);
+    }
+
+    .bookmark-btn.active {
+      background: rgba(245, 158, 11, 0.2);
+      color: var(--accent-amber);
+      border-color: var(--accent-amber);
+    }
+
+    .hide-btn {
+      position: absolute;
+      top: 1rem;
+      right: 3.4rem;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+      z-index: 5;
+    }
+
+    .hide-btn:hover {
+      transform: scale(1.15);
+      color: var(--accent-rose);
+      border-color: var(--accent-rose);
+    }
+
+    .hide-btn.active {
+      background: rgba(244, 63, 94, 0.2);
+      color: var(--accent-rose);
+      border-color: var(--accent-rose);
+    }
+
+    .item-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      color: #f8fafc;
+      padding-right: 2.2rem;
+    }
+
+    .tag-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .tag {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    .tag-amber {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--accent-amber);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .tag-blue {
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--accent-blue);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .tag-emerald {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent-emerald);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .tag-gold {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #000;
+      font-weight: 700;
+    }
+
+    .tag-purple {
+      background: rgba(139, 92, 246, 0.15);
+      color: var(--accent-purple);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+
+    .item-meta {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .meta-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--border-color);
+      padding-top: 0.75rem;
+      margin-top: auto;
+    }
+
+    .btn-detail {
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--accent-blue);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      padding: 0.4rem 0.85rem;
+      border-radius: 6px;
+      font-size: 0.825rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-detail:hover {
+      background: var(--accent-blue);
+      color: white;
+    }
+
+    /* Modal Styling */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      padding: 1rem;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-content {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      max-width: 720px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 2rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 1.25rem;
+      right: 1.25rem;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: #fff;
+      padding-right: 2rem;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      background: var(--bg-input);
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 1.25rem;
+      font-size: 0.875rem;
+    }
+
+    .detail-item strong {
+      display: block;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-bottom: 0.15rem;
+    }
+
+    .detail-desc {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1rem;
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+      line-height: 1.6;
+      color: #cbd5e1;
+      max-height: 250px;
+      overflow-y: auto;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="header-content">
+      <div class="brand">
+        <div class="brand-logo">1365</div>
+        <div>
+          <div class="brand-title">1365 자원봉사 2단계 파이프라인 Explorer</div>
+          <div class="brand-sub">Area Mapper 엔진 이식 & 0.001초 메모리 필터링 & ⭐ 관심 등록 지원</div>
+        </div>
+      </div>
+      <div class="badge-status">
+        <span class="badge-dot"></span>
+        Area Mapper Engine Loaded
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Left Control Panel -->
+    <section class="panel">
+      <!-- 1단계: 원천 데이터 수집 -->
+      <div class="panel-title">
+        <span>📥 [1단계] API 데이터 수집</span>
+        <span class="step-badge">Data Ingestion</span>
+      </div>
+
+      <div class="form-group">
+        <label>수집 건수 (numOfRows)</label>
+        <div class="form-row">
+          <select id="numOfRows" class="form-control">
+            <option value="12">12건</option>
+            <option value="100" selected>100건 (추천)</option>
+            <option value="1000">1,000건</option>
+            <option value="10000">10,000건 (전체 데이터)</option>
+          </select>
+          <input type="number" id="pageNo" class="form-control" value="1" min="1" placeholder="페이지">
+        </div>
+      </div>
+
+      <button class="btn-submit" id="btnFetch" style="margin-bottom: 1.5rem;">
+        <span id="btnText">🚀 1365 원천 데이터 1회 수집</span>
+      </button>
+
+      <!-- 2단계: 순수 반응형 필터링 -->
+      <div class="panel-title">
+        <span>⚡ [2단계] 반응형 0.001초 필터</span>
+        <span class="step-badge"
+          style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.3);">Data
+          Filtering</span>
+      </div>
+
+      <div class="form-group">
+        <label>모집 및 자격 상태</label>
+        <div class="checkbox-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="recruitingOnly" checked>
+            <span>모집 중만</span>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="adultPosbl">
+            <span>성인 가능</span>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="youthPosbl">
+            <span>청소년 가능</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>지역 선택 (Area Mapper 연동)</label>
+        <div class="form-row">
+          <select id="sidoSelect" class="form-control">
+            <option value="">전국 (시/도 전체)</option>
+            <option value="6110000">서울특별시</option>
+            <option value="6410000">경기도</option>
+            <option value="6260000">부산광역시</option>
+            <option value="6480000">경상남도</option>
+            <option value="6270000">대구광역시</option>
+            <option value="6280000">인천광역시</option>
+            <option value="6290000">광주광역시</option>
+            <option value="6300000">대전광역시</option>
+            <option value="6310000">울산광역시</option>
+            <option value="5690000">세종시</option>
+            <option value="6420000">강원도</option>
+            <option value="6430000">충청북도</option>
+            <option value="6440000">충청남도</option>
+            <option value="6450000">전북</option>
+            <option value="6460000">전라남도</option>
+            <option value="6470000">경상북도</option>
+            <option value="6500000">제주도</option>
+          </select>
+          <input type="text" id="locText" class="form-control" placeholder="시/군/구 (예: 강남구, 안산시)">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>포함 / 미포함 키워드</label>
+        <div class="form-row">
+          <input type="text" id="includeKwds" class="form-control" placeholder="포함 (예: 복구, 지원)">
+          <input type="text" id="excludeKwds" class="form-control" placeholder="제외 (예: 운전, 주차)">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>📅 활동 지정일 (Target Date)</label>
+        <input type="date" id="targetDate" class="form-control">
+      </div>
+
+      <div class="form-group">
+        <label>🔀 3단계 다중 정렬 파이프라인 (1차 / 2차 / 3차)</label>
+        <!-- 1차 정렬 -->
+        <div class="form-row" style="margin-bottom: 0.5rem;">
+          <select id="sortBy" class="form-control">
+            <option value="noticeEndde">1차: 모집마감일 순</option>
+            <option value="progrmBgnde">1차: 봉사시작일 순</option>
+            <option value="progrmEndde">1차: 봉사종료일 순</option>
+            <option value="progrmSj">1차: 제목 순</option>
+          </select>
+          <select id="sortOrder1" class="form-control">
+            <option value="asc">1차: 오름차순 (임박한 순 ⬆️)</option>
+            <option value="desc">1차: 내림차순 (나중 순 ⬇️)</option>
+          </select>
+        </div>
+        <!-- 2차 정렬 -->
+        <div class="form-row" style="margin-bottom: 0.5rem;">
+          <select id="sortBy2" class="form-control">
+            <option value="">2차: 정렬 없음 (선택)</option>
+            <option value="progrmBgnde">2차: 봉사시작일 순</option>
+            <option value="progrmEndde">2차: 봉사종료일 순</option>
+            <option value="noticeEndde">2차: 모집마감일 순</option>
+            <option value="progrmSj">2차: 제목 순</option>
+          </select>
+          <select id="sortOrder2" class="form-control">
+            <option value="asc">2차: 오름차순 ⬆️</option>
+            <option value="desc">2차: 내림차순 ⬇️</option>
+          </select>
+        </div>
+        <!-- 3차 정렬 -->
+        <div class="form-row">
+          <select id="sortBy3" class="form-control">
+            <option value="">3차: 정렬 없음 (선택)</option>
+            <option value="progrmSj">3차: 제목 순</option>
+            <option value="progrmBgnde">3차: 봉사시작일 순</option>
+            <option value="progrmEndde">3차: 봉사종료일 순</option>
+            <option value="noticeEndde">3차: 모집마감일 순</option>
+          </select>
+          <select id="sortOrder3" class="form-control">
+            <option value="asc">3차: 오름차순 ⬆️</option>
+            <option value="desc">3차: 내림차순 ⬇️</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Results Panel -->
+    <section class="panel">
+      <div class="results-header">
+        <div>
+          <h2 class="panel-title" style="margin-bottom: 0; border: none; padding: 0;">📊 자원봉사 목록</h2>
+          <div style="font-size: 0.825rem; color: var(--text-muted); margin-top: 0.3rem;">
+            원천 수집: <strong id="totalCount" style="color: var(--accent-blue);">0</strong>건 | ⚡ 필터링 적용: <strong
+              id="filteredCount" style="color: var(--accent-emerald); font-size: 1rem;">0</strong>건
+          </div>
+          <div id="activeFilterBadges" style="margin-top: 0.4rem; display: flex; flex-wrap: wrap; gap: 0.3rem;"></div>
+        </div>
+
+        <div class="results-tabs">
+          <button class="tab-btn active" id="tabAll">📋 전체 결과</button>
+          <button class="tab-btn" id="tabBookmark">⭐ 관심 목록 (<span id="bookmarkCount">0</span>)</button>
+          <button class="tab-btn" id="tabHidden">🚫 숨김 목록 (<span id="hiddenCount">0</span>)</button>
+        </div>
+      </div>
+
+      <div id="resultsContainer" class="card-grid">
+        <div style="grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; color: var(--text-muted);">
+          좌측의 <strong>[🚀 1365 원천 데이터 1회 수집]</strong> 버튼을 클릭하여 데이터를 불러오세요.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Detail Modal -->
+  <div class="modal-overlay" id="detailModal">
+    <div class="modal-content">
+      <button class="modal-close" id="modalClose">&times;</button>
+      <h3 class="modal-title" id="mTitle">봉사활동 상세 정보</h3>
+
+      <div class="detail-grid">
+        <div class="detail-item">
+          <strong>프로그램 등록번호</strong>
+          <span id="mRegNo">-</span>
+        </div>
+        <div class="detail-item">
+          <strong>모집 기관</strong>
+          <span id="mMnnstNm">-</span>
+        </div>
+        <div class="detail-item">
+          <strong>지역 위치 (Location)</strong>
+          <span id="mLocName">-</span>
+        </div>
+        <div class="detail-item">
+          <strong>📢 모집 기간</strong>
+          <span id="mNoticePeriod" style="color: var(--accent-amber); font-weight: 600;">-</span>
+        </div>
+        <div class="detail-item">
+          <strong>📅 봉사 기간</strong>
+          <span id="mPeriod" style="color: var(--accent-emerald); font-weight: 600;">-</span>
+        </div>
+        <div class="detail-item">
+          <strong>활동시간</strong>
+          <span id="mTime">-</span>
+        </div>
+        <div class="detail-item">
+          <strong>봉사 장소</strong>
+          <span id="mPlace">-</span>
+        </div>
+        <div class="detail-item">
+          <strong>모집 인원 / 신청 인원</strong>
+          <span id="mQuota">-</span>
+        </div>
+        <div class="detail-item">
+          <strong>담당자 / 연락처</strong>
+          <span id="mContact">-</span>
+        </div>
+      </div>
+
+      <div style="font-weight: 700; margin-top: 1rem; color: #f1f5f9;">📝 상세 내용</div>
+      <div class="detail-desc" id="mDesc">
+        내용을 불러오는 중...
+      </div>
+
+      <div style="margin-top: 1.5rem; text-align: right;">
+        <a id="mUrl" href="#" target="_blank" class="btn-submit"
+          style="display: inline-flex; text-decoration: none; width: auto; padding: 0.6rem 1.2rem;">
+          🔗 1365 포털에서 직접 신청하기
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Global State
+    let windowRawData = [];
+    let bookmarks = JSON.parse(localStorage.getItem('1365_bookmarks') || '[]');
+    let hiddenItems = JSON.parse(localStorage.getItem('1365_hidden') || '[]');
+    let currentTab = 'all';
+    let displayLimit = 20;
+    let currentPage = 1;
+    let currentFilteredItems = [];
+
+    function updateBookmarkCount() {
+      document.getElementById('bookmarkCount').textContent = bookmarks.length;
+    }
+    updateBookmarkCount();
+
+    function updateHiddenCount() {
+      document.getElementById('hiddenCount').textContent = hiddenItems.length;
+    }
+    updateHiddenCount();
+
+    // F5 새로고침 자동 캐시 복원 (localStorage Persistence)
+    window.addEventListener('DOMContentLoaded', () => {
+      const cached = localStorage.getItem('1365_raw_cache');
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          if (parsed && parsed.items && parsed.items.length > 0) {
+            windowRawData = parsed.items;
+            document.getElementById('totalCount').textContent = parsed.totalCount || parsed.items.length;
+
+            // 캐시 안내 배지
+            const badgesContainer = document.getElementById('activeFilterBadges');
+            badgesContainer.innerHTML = `<span class="tag tag-emerald">💾 로컬 캐시 0초 복원됨 (${parsed.items.length}건)</span>`;
+            applyFiltersAndRender();
+          }
+        } catch (e) {
+          console.error("Cache load error:", e);
+        }
+      }
+    });
+
+    function toggleBookmark(regNo, e) {
+      if (e) e.stopPropagation();
+      const idx = bookmarks.indexOf(regNo);
+      if (idx > -1) {
+        bookmarks.splice(idx, 1);
+      } else {
+        bookmarks.push(regNo);
+      }
+      localStorage.setItem('1365_bookmarks', JSON.stringify(bookmarks));
+      updateBookmarkCount();
+      applyFiltersAndRender(false); // 관심 등록 토글 시 현재 페이지 위치 유지
+    }
+
+    function toggleHide(regNo, e) {
+      if (e) e.stopPropagation();
+      const idx = hiddenItems.indexOf(regNo);
+      if (idx > -1) {
+        hiddenItems.splice(idx, 1);
+      } else {
+        hiddenItems.push(regNo);
+      }
+      localStorage.setItem('1365_hidden', JSON.stringify(hiddenItems));
+      updateHiddenCount();
+      applyFiltersAndRender(false); // 숨기기 토글 시 현재 페이지 위치 유지
+    }
+
+    // Results Tab Switcher
+    document.getElementById('tabAll').addEventListener('click', () => {
+      currentTab = 'all';
+      document.getElementById('tabAll').className = 'tab-btn active';
+      document.getElementById('tabBookmark').className = 'tab-btn';
+      document.getElementById('tabHidden').className = 'tab-btn';
+      applyFiltersAndRender(true);
+    });
+
+    document.getElementById('tabBookmark').addEventListener('click', () => {
+      currentTab = 'bookmark';
+      document.getElementById('tabAll').className = 'tab-btn';
+      document.getElementById('tabBookmark').className = 'tab-btn active-bookmark';
+      document.getElementById('tabHidden').className = 'tab-btn';
+      applyFiltersAndRender(true);
+    });
+
+    document.getElementById('tabHidden').addEventListener('click', () => {
+      currentTab = 'hidden';
+      document.getElementById('tabAll').className = 'tab-btn';
+      document.getElementById('tabBookmark').className = 'tab-btn';
+      document.getElementById('tabHidden').className = 'tab-btn active-hidden';
+      applyFiltersAndRender(true);
+    });
+
+    // XML Parser with locationName injection
+    function parseXml(xmlText) {
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+      const items = xmlDoc.getElementsByTagName("item");
+      const totalCount = xmlDoc.getElementsByTagName("totalCount")[0]?.textContent || items.length;
+
+      const result = [];
+      for (let i = 0; i < items.length; i++) {
+        const itemNode = items[i];
+        const itemObj = {};
+        for (let j = 0; j < itemNode.children.length; j++) {
+          const child = itemNode.children[j];
+          itemObj[child.tagName] = child.textContent;
+        }
+
+        // Inject 100% accurate locationName via Area Mapper Engine!
+        const addressText = `${itemObj.areaAddress1 || ''} ${itemObj.postAdres || ''} ${itemObj.actPlace || ''} ${itemObj.nanmmbyNm || ''}`;
+        itemObj.locationName = AREA_MAPPER.getLocationName(
+          itemObj.sidoCd,
+          itemObj.gugunCd,
+          addressText
+        );
+
+        result.push(itemObj);
+      }
+      return { totalCount, items: result };
+    }
+
+    // ==========================================
+    // 📥 1단계: API 원천 수집 (Data Ingestion)
+    // ==========================================
+    document.getElementById('btnFetch').addEventListener('click', async () => {
+      const numOfRows = document.getElementById('numOfRows').value;
+      const pageNo = document.getElementById('pageNo').value;
+      const sidoCd = document.getElementById('sidoSelect').value;
+
+      let reqUrl = `/api/volunteer?op=getVltrSearchWordList&numOfRows=${numOfRows}&pageNo=${pageNo}`;
+      if (sidoCd) reqUrl += `&sidoCd=${sidoCd}`;
+
+      if (window.location.protocol === 'file:') {
+        alert('보안 강화를 위해 http://localhost:3000 프록시 서버로 접속하세요. (.env 키 보호)');
+        return;
+      }
+
+      const btnText = document.getElementById('btnText');
+      btnText.innerHTML = `<span class="loading-spinner"></span> 1회 수집 진행 중...`;
+
+      try {
+        const resp = await fetch(reqUrl);
+        const text = await resp.text();
+        const { totalCount, items } = parseXml(text);
+
+        document.getElementById('totalCount').textContent = totalCount;
+        windowRawData = items;
+
+        // Save to localStorage for instant F5 restoration
+        try {
+          localStorage.setItem('1365_raw_cache', JSON.stringify({
+            timestamp: Date.now(),
+            totalCount: totalCount,
+            items: items
+          }));
+        } catch (e) {
+          console.warn("Storage cache quota exceeded:", e);
+        }
+
+        applyFiltersAndRender(true);
+      } catch (err) {
+        document.getElementById('resultsContainer').innerHTML = `
+          <div style="grid-column: 1 / -1; background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.3); padding: 1.5rem; border-radius: 8px; color: #f87171;">
+            ⚠️ <strong>데이터 수집 중 오류 발생:</strong> ${err.message}
+          </div>
+        `;
+      } finally {
+        btnText.innerHTML = `🚀 1365 원천 데이터 1회 수집`;
+      }
+    });
+
+    // ==========================================
+    // ⚡ 2단계: 순수 반응형 0.001초 필터링 (Data Filtering)
+    // ==========================================
+    function applyFiltersAndRender(resetPage = true) {
+      displayLimit = 20; // Reset pagination limit on filter change
+      if (resetPage) currentPage = 1;
+      if (windowRawData.length === 0) {
+        document.getElementById('resultsContainer').innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; color: var(--text-muted);">
+            수집된 원천 데이터가 없습니다. [🚀 1365 원천 데이터 1회 수집] 버튼을 클릭하세요.
+          </div>
+        `;
+        document.getElementById('filteredCount').textContent = '0';
+        return;
+      }
+
+      const recruitingOnly = document.getElementById('recruitingOnly').checked;
+      const adultPosbl = document.getElementById('adultPosbl').checked;
+      const youthPosbl = document.getElementById('youthPosbl').checked;
+      const sidoCd = document.getElementById('sidoSelect').value;
+      const locText = document.getElementById('locText').value.trim();
+      const includeKwds = document.getElementById('includeKwds').value.trim().split(',').map(s => s.trim()).filter(Boolean);
+      const excludeKwds = document.getElementById('excludeKwds').value.trim().split(',').map(s => s.trim()).filter(Boolean);
+      const targetDate = document.getElementById('targetDate').value.replace(/-/g, '');
+      const sortBy = document.getElementById('sortBy').value;
+      const sortOrder1 = document.getElementById('sortOrder1').value;
+      const sortBy2 = document.getElementById('sortBy2').value;
+      const sortOrder2 = document.getElementById('sortOrder2').value;
+      const sortBy3 = document.getElementById('sortBy3').value;
+      const sortOrder3 = document.getElementById('sortOrder3').value;
+
+      let filtered = windowRawData.filter(item => {
+        const isBm = bookmarks.includes(item.progrmRegistNo);
+        const isHd = hiddenItems.includes(item.progrmRegistNo);
+
+        // Tab filter logic
+        if (currentTab === 'bookmark') {
+          if (!isBm || isHd) return false;
+        } else if (currentTab === 'hidden') {
+          if (!isHd) return false;
+        } else {
+          // 'all' tab: hide items in hiddenItems!
+          if (isHd) return false;
+        }
+
+        // 1. Recruiting status
+        if (recruitingOnly && item.progrmSttusSe && item.progrmSttusSe !== '2') return false;
+
+        // 2. Adult / Youth
+        if (adultPosbl && item.adultPosblAt !== 'Y') return false;
+        if (youthPosbl && item.yngbgsPosblAt !== 'Y') return false;
+
+        // 3. Location Filter
+        if (sidoCd && item.sidoCd !== sidoCd) return false;
+
+        if (locText) {
+          const locStr = `${item.locationName || ''} ${item.actPlace || ''} ${item.nanmmbyNm || ''} ${item.postAdres || ''}`;
+          let locMatched = locStr.includes(locText);
+          if (!locMatched) {
+            for (const [code, name] of Object.entries(AREA_MAPPER.SIDO_MAP)) {
+              if (name.includes(locText) || locText.includes(name.replace(/(특별시|광역시|특별자치도|도)/g, ''))) {
+                if (item.sidoCd === code) locMatched = true;
+              }
+            }
+            for (const [key, name] of Object.entries(AREA_MAPPER.COMPOSITE_GUGUN)) {
+              if (name.includes(locText) || locText.includes(name)) {
+                const [sCode, gCode] = key.split('_');
+                if (item.gugunCd === gCode) locMatched = true;
+              }
+            }
+          }
+          if (!locMatched) return false;
+        }
+
+        // 4. Included keywords
+        if (includeKwds.length > 0) {
+          const text = `${item.progrmSj || ''} ${item.nanmmbyNm || ''} ${item.actPlace || ''}`;
+          if (!includeKwds.some(k => text.includes(k))) return false;
+        }
+
+        // 5. Excluded keywords
+        if (excludeKwds.length > 0) {
+          const text = `${item.progrmSj || ''} ${item.nanmmbyNm || ''} ${item.actPlace || ''}`;
+          if (excludeKwds.some(k => text.includes(k))) return false;
+        }
+
+        // 6. Target date
+        if (targetDate) {
+          const bgnde = item.progrmBgnde || '';
+          const endde = item.progrmEndde || '';
+          if (bgnde && endde && (targetDate < bgnde || targetDate > endde)) return false;
+        }
+
+        return true;
+      });
+
+      // ⚡ 3단계 다중 정렬 파이프라인 (1차 ➔ 2차 ➔ 3차 정렬)
+      filtered.sort((a, b) => {
+        // 1차 정렬
+        const valA1 = a[sortBy] || '';
+        const valB1 = b[sortBy] || '';
+        let cmp1 = valA1.localeCompare(valB1);
+        if (cmp1 !== 0) {
+          return sortOrder1 === 'asc' ? cmp1 : -cmp1;
+        }
+
+        // 2차 정렬 (1차 동률 시)
+        if (sortBy2 && sortBy2 !== sortBy) {
+          const valA2 = a[sortBy2] || '';
+          const valB2 = b[sortBy2] || '';
+          let cmp2 = valA2.localeCompare(valB2);
+          if (cmp2 !== 0) {
+            return sortOrder2 === 'asc' ? cmp2 : -cmp2;
+          }
+        }
+
+        // 3차 정렬 (2차 동률 시)
+        if (sortBy3 && sortBy3 !== sortBy && sortBy3 !== sortBy2) {
+          const valA3 = a[sortBy3] || '';
+          const valB3 = b[sortBy3] || '';
+          let cmp3 = valA3.localeCompare(valB3);
+          if (cmp3 !== 0) {
+            return sortOrder3 === 'asc' ? cmp3 : -cmp3;
+          }
+        }
+
+        return 0;
+      });
+
+      currentFilteredItems = filtered;
+      document.getElementById('filteredCount').textContent = filtered.length;
+
+      // Active filter badges
+      const badgesContainer = document.getElementById('activeFilterBadges');
+      const badges = [];
+      if (recruitingOnly) badges.push('<span class="tag tag-blue">✓ 모집중만</span>');
+      if (adultPosbl) badges.push('<span class="tag tag-emerald">✓ 성인가능</span>');
+      if (youthPosbl) badges.push('<span class="tag tag-emerald">✓ 청소년가능</span>');
+      if (sidoCd) badges.push(`<span class="tag tag-amber">📍 시/도: ${AREA_MAPPER.SIDO_MAP[sidoCd] || sidoCd}</span>`);
+      if (locText) badges.push(`<span class="tag tag-amber">📍 지역: ${locText}</span>`);
+      if (includeKwds.length > 0) badges.push(`<span class="tag tag-purple">🔍 포함: ${includeKwds.join(', ')}</span>`);
+      if (excludeKwds.length > 0) badges.push(`<span class="tag tag-amber" style="color:#f43f5e; border-color:#f43f5e;">🚫 제외: ${excludeKwds.join(', ')}</span>`);
+      if (targetDate) badges.push(`<span class="tag tag-amber">📅 날짜: ${document.getElementById('targetDate').value}</span>`);
+
+      badgesContainer.innerHTML = badges.join('');
+      renderCardsList();
+    }
+
+    // ⚡ 클라이언트 사이드 0초 인메모리 페이지네이션 컨트롤러
+    function renderCardsList() {
+      const container = document.getElementById('resultsContainer');
+      if (currentFilteredItems.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: var(--text-muted);">
+            필터 조건에 일치하는 봉사활동이 없습니다.
+          </div>
+        `;
+        return;
+      }
+      const totalPages = Math.ceil(currentFilteredItems.length / displayLimit) || 1;
+      if (currentPage > totalPages) currentPage = totalPages;
+      if (currentPage < 1) currentPage = 1;
+
+      const startIdx = (currentPage - 1) * displayLimit;
+      const visible = currentFilteredItems.slice(startIdx, startIdx + displayLimit);
+
+      const cardsHtml = visible.map(item => {
+        const title = item.progrmSj || '제목 없음';
+        const regNo = item.progrmRegistNo || '-';
+        const mnnst = (item.mnnstNm && item.mnnstNm.trim()) ? item.mnnstNm.trim() : '';
+        const nanm = (item.nanmmbyNm && item.nanmmbyNm.trim()) ? item.nanmmbyNm.trim() : '';
+        const org = mnnst || cleanAgencyName(nanm);
+        const noticePeriod = (item.noticeBgnde && item.noticeEndde) ? `${formatDate(item.noticeBgnde)} ~ ${formatDate(item.noticeEndde)}` : '-';
+        const progrmPeriod = (item.progrmBgnde && item.progrmEndde) ? `${formatDate(item.progrmBgnde)} ~ ${formatDate(item.progrmEndde)}` : '-';
+        const actTime = (item.actBeginTm || item.actEndTm) ? `${item.actBeginTm || ''}시 ~ ${item.actEndTm || ''}시` : '-';
+        const locName = item.locationName || '전국';
+        const adult = item.adultPosblAt === 'Y' ? '<span class="tag tag-blue">성인가능</span>' : '';
+        const youth = item.yngbgsPosblAt === 'Y' ? '<span class="tag tag-emerald">청소년가능</span>' : '';
+
+        // D-DAY 마감 임박 배지 계산!
+        const dDayInfo = calculateDDay(item.noticeEndde);
+        const dDayBadge = dDayInfo ? `<span class="tag ${dDayInfo.badgeClass}" style="font-weight: 700;">${dDayInfo.label}</span>` : '';
+
+        const isBm = bookmarks.includes(regNo);
+        const isHd = hiddenItems.includes(regNo);
+        const bmClass = isBm ? 'active' : '';
+        const hideClass = isHd ? 'active' : '';
+        const cardBmClass = isBm ? 'bookmarked' : '';
+        const hideBadge = isHd ? '<span class="tag tag-rose" style="background: rgba(244,63,94,0.2); color:#f43f5e;">🚫 숨김 처리됨</span>' : '';
+
+        return `
+          <div class="item-card ${cardBmClass}">
+            <button class="hide-btn ${hideClass}" title="${isHd ? '숨기기 해제' : '관심 없음 (숨기기)'}" onclick="toggleHide('${regNo}', event)">
+              🚫
+            </button>
+            <button class="bookmark-btn ${bmClass}" title="관심 등록 토글" onclick="toggleBookmark('${regNo}', event)">
+              ★
+            </button>
+            <div>
+              <div class="tag-container" style="margin-bottom: 0.6rem;">
+                <span class="tag tag-amber">NO. ${regNo}</span>
+                ${dDayBadge}
+                ${hideBadge}
+                ${adult}
+                ${youth}
+              </div>
+              <h3 class="item-title">${title}</h3>
+            </div>
+
+            <div class="item-meta">
+              <div class="meta-row">
+                <span class="meta-icon">📍</span> <strong style="color: var(--accent-blue);">${locName}</strong>
+              </div>
+              <div class="meta-row">
+                <span class="meta-icon">🏢</span> ${org}
+              </div>
+              <div class="meta-row">
+                <span class="meta-icon">📢</span> <span style="color: var(--accent-amber); font-weight: 500;">모집: ${noticePeriod}</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-icon">📅</span> <span style="color: var(--accent-emerald); font-weight: 500;">봉사: ${progrmPeriod}</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-icon">⏰</span> <span style="color: var(--accent-purple); font-weight: 500;">시간: ${actTime}</span>
+              </div>
+            </div>
+
+            <div class="card-footer">
+              <a href="${item.url || 'https://www.1365.go.kr/vols/P9210/partcptn/timeCptn.do?type=show&progrmRegistNo=' + regNo}" target="_blank" style="font-size: 0.78rem; color: var(--accent-blue); text-decoration: none; display: inline-flex; align-items: center; gap: 0.2rem; font-weight: 500;">
+                🔗 1365 신청하기
+              </a>
+              <button class="btn-detail" onclick="openDetail('${regNo}')">상세보기</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // ⚡ 클라이언트 사이드 페이지 번호 바 [1] [2] [3] [4] [5] 생성
+      let paginationHtml = '';
+      if (totalPages > 1) {
+        let pageBtns = '';
+        const maxVisibleBtns = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisibleBtns / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisibleBtns - 1);
+
+        if (endPage - startPage + 1 < maxVisibleBtns) {
+          startPage = Math.max(1, endPage - maxVisibleBtns + 1);
+        }
+
+        for (let p = startPage; p <= endPage; p++) {
+          const activeStyle = p === currentPage ? 'background: var(--accent-blue); color: white; border-color: var(--accent-blue); font-weight: 700;' : 'background: var(--bg-card); color: var(--text-main); border-color: var(--border-color);';
+          pageBtns += `<button class="btn-detail" style="padding: 0.4rem 0.8rem; min-width: 38px; ${activeStyle}" onclick="goToPage(${p})">${p}</button>`;
+        }
+
+        const prevDisabled = currentPage === 1 ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : '';
+        const nextDisabled = currentPage === totalPages ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : '';
+
+        paginationHtml = `
+          <div style="grid-column: 1 / -1; display: flex; justify-content: center; align-items: center; gap: 0.4rem; margin-top: 2rem; margin-bottom: 2rem;">
+            <button class="btn-detail" ${prevDisabled} onclick="goToPage(${currentPage - 1})">◀ 이전</button>
+            ${pageBtns}
+            <button class="btn-detail" ${nextDisabled} onclick="goToPage(${currentPage + 1})">다음 ▶</button>
+            <span style="font-size: 0.8rem; color: var(--text-muted); margin-left: 0.8rem;">
+              (${currentPage} / ${totalPages} 페이지, 총 ${currentFilteredItems.length}건)
+            </span>
+          </div>
+        `;
+      }
+
+      container.innerHTML = cardsHtml + paginationHtml;
+    }
+
+    function goToPage(page) {
+      currentPage = page;
+      renderCardsList();
+      window.scrollTo({ top: document.querySelector('.results-header').offsetTop - 20, behavior: 'smooth' });
+    }
+
+    // Modal Details Fetcher
+    async function openDetail(regNo) {
+      const modal = document.getElementById('detailModal');
+      modal.classList.add('active');
+      document.getElementById('mTitle').textContent = '상세 정보 불러오는 중...';
+      document.getElementById('mDesc').textContent = '잠시만 기다려주세요...';
+
+      let reqUrl = `/api/volunteer?op=getVltrPartcptnItem&progrmRegistNo=${regNo}`;
+      if (window.location.protocol === 'file:') {
+        alert('보안 강화를 위해 http://localhost:3000 프록시 서버로 접속하세요. (.env 키 보호)');
+        return;
+      }
+
+      try {
+        const resp = await fetch(reqUrl);
+        const text = await resp.text();
+        const { items } = parseXml(text);
+
+        if (items.length > 0) {
+          const d = items[0];
+          document.getElementById('mTitle').textContent = d.progrmSj || '자원봉사 상세';
+          document.getElementById('mRegNo').textContent = d.progrmRegistNo || '-';
+
+          const mnnst = (d.mnnstNm && d.mnnstNm.trim()) ? d.mnnstNm.trim() : '';
+          const nanm = (d.nanmmbyNm && d.nanmmbyNm.trim()) ? d.nanmmbyNm.trim() : '';
+
+          document.getElementById('mMnnstNm').textContent = mnnst || cleanAgencyName(nanm);
+          document.getElementById('mLocName').textContent = d.locationName || '-';
+
+          const dDayInfo = calculateDDay(d.noticeEndde);
+          const dDayStr = dDayInfo ? ` [${dDayInfo.label}]` : '';
+
+          document.getElementById('mNoticePeriod').textContent = ((d.noticeBgnde && d.noticeEndde) ? `${formatDate(d.noticeBgnde)} ~ ${formatDate(d.noticeEndde)}` : '-') + dDayStr;
+          document.getElementById('mPeriod').textContent = (d.progrmBgnde && d.progrmEndde) ? `${formatDate(d.progrmBgnde)} ~ ${formatDate(d.progrmEndde)}` : '-';
+          document.getElementById('mTime').textContent = `${d.actBeginTm || ''}시 ~ ${d.actEndTm || ''}시`;
+          document.getElementById('mPlace').textContent = d.actPlace || d.postAdres || '-';
+          document.getElementById('mQuota').textContent = `${d.rcritNmpr || '0'}명 / ${d.appTotal || '0'}명`;
+          document.getElementById('mContact').textContent = `${d.nanmmbyNmAdmn || '-'} (${d.telno || '연락처 없음'})`;
+          document.getElementById('mDesc').textContent = d.progrmCn || '상세 내용이 없습니다.';
+
+          const portalUrl = d.url || `https://www.1365.go.kr/vols/P9210/partcptn/timeCptn.do?type=show&progrmRegistNo=${regNo}`;
+          const urlLink = document.getElementById('mUrl');
+          urlLink.href = portalUrl;
+          urlLink.style.display = 'inline-flex';
+        }
+      } catch (err) {
+        document.getElementById('mDesc').textContent = '상세 정보를 가져오는 도중 오류가 발생했습니다.';
+      }
+    }
+
+    document.getElementById('modalClose').addEventListener('click', () => {
+      document.getElementById('detailModal').classList.remove('active');
+    });
+
+    // 💡 300ms Debounce Helper for Text Inputs (타이핑 유예 UX 적용)
+    let debounceTimer = null;
+    function debouncedFilter() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        applyFiltersAndRender();
+      }, 300);
+    }
+
+    // 1. 체크박스 / 드롭다운 / 날짜 ➔ 클릭 즉시 0초 실시간반영
+    ['recruitingOnly', 'adultPosbl', 'youthPosbl', 'sidoSelect', 'targetDate', 'sortBy', 'sortOrder1', 'sortBy2', 'sortOrder2', 'sortBy3', 'sortOrder3'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('change', applyFiltersAndRender);
+    });
+
+    // 2. 텍스트 입력창 ➔ 300ms 디바운스 유예 적용 (타이핑 시 깜빡임 100% 방지)
+    ['locText', 'includeKwds', 'excludeKwds'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', debouncedFilter);
+        el.addEventListener('change', applyFiltersAndRender);
+      }
+    });
+  </script>
+</body>
+</html>
