@@ -194,6 +194,33 @@
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
     }
 
+    /* 📅 날짜 선택 인풋: Full Ingestion / Data Filtering 박스 톤앤매너 */
+    input[type="date"].form-control {
+      color-scheme: dark;
+      padding: 0.5rem 0.6rem 0.5rem 0.85rem;
+    }
+
+    input[type="date"].form-control::-webkit-calendar-picker-indicator {
+      cursor: pointer;
+      border: none;
+      background-color: rgba(59, 130, 246, 0.38);
+      border-radius: 6px;
+      padding: 4px 7px;
+      margin-left: 0.5rem;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    input[type="date"].form-control::-webkit-calendar-picker-indicator:hover {
+      background-color: rgba(59, 130, 246, 0.65);
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.35);
+      transform: translateY(-1px);
+    }
+
+    input[type="date"].form-control::-webkit-calendar-picker-indicator:active {
+      transform: translateY(1px);
+      background-color: rgba(59, 130, 246, 0.85);
+    }
+
     .form-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -1659,9 +1686,15 @@
       if (el) el.addEventListener('change', applyFiltersAndRender);
     });
 
-    // 2. 날짜 선택 시 자동으로 useTargetDate 켜짐
+    // 2. 날짜 선택/키보드 직접 입력: 값 변경 시 자동으로 useTargetDate 켜짐
     const targetDateEl = document.getElementById('targetDate');
     if (targetDateEl) {
+      targetDateEl.addEventListener('input', () => {
+        if (targetDateEl.value && !document.getElementById('useTargetDate').checked) {
+          document.getElementById('useTargetDate').checked = true;
+        }
+        applyFiltersAndRender();
+      });
       targetDateEl.addEventListener('change', () => {
         if (targetDateEl.value && !document.getElementById('useTargetDate').checked) {
           document.getElementById('useTargetDate').checked = true;
