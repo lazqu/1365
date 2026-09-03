@@ -226,6 +226,98 @@
       cursor: pointer;
     }
 
+    /* 🔘 Micro-Compact In-Track Text Toggle Switch (슬림 44x20px & 라벨 수직 완벽 정렬) */
+    .form-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.35rem;
+      min-height: 20px;
+    }
+
+    .form-header-row label {
+      margin-bottom: 0 !important;
+      display: flex;
+      align-items: center;
+    }
+
+    .toggle-switch-wrapper {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      cursor: pointer;
+      user-select: none;
+      margin-bottom: 0 !important;
+      line-height: 1;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 44px;
+      height: 20px;
+      background: rgba(148, 163, 184, 0.22);
+      border-radius: 20px;
+      transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      cursor: pointer;
+      display: inline-block;
+      flex-shrink: 0;
+      vertical-align: middle;
+    }
+
+    .toggle-switch::before {
+      content: 'OFF';
+      position: absolute;
+      top: 50%;
+      right: 5px;
+      transform: translateY(-50%);
+      font-size: 0.58rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      letter-spacing: 0.3px;
+      transition: all 0.2s ease;
+      line-height: 1;
+    }
+
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: white;
+      transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+      z-index: 2;
+    }
+
+    .toggle-checkbox {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+    }
+
+    .toggle-checkbox:checked + .toggle-switch {
+      background: var(--accent-blue);
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 8px rgba(59, 130, 246, 0.35);
+    }
+
+    .toggle-checkbox:checked + .toggle-switch::before {
+      content: 'ON';
+      left: 6px;
+      right: auto;
+      color: #ffffff;
+    }
+
+    .toggle-checkbox:checked + .toggle-switch::after {
+      transform: translateX(24px);
+    }
+
     .btn-submit {
       width: 100%;
       background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
@@ -692,16 +784,34 @@
       </div>
 
       <div class="form-group">
-        <label>포함 / 미포함 키워드</label>
-        <div class="form-row">
+        <div class="form-header-row">
+          <label style="font-weight: 600; display: flex; align-items: center; gap: 0.35rem;">
+            <span>🔍 포함 / 미포함 키워드</span>
+          </label>
+          <label class="toggle-switch-wrapper" title="키워드 필터 전원 On/Off">
+            <span id="kwdStatusBadge" style="font-size: 0.72rem; color: var(--accent-amber); font-weight: 600;"></span>
+            <input type="checkbox" id="useKwds" class="toggle-checkbox" checked>
+            <span class="toggle-switch"></span>
+          </label>
+        </div>
+        <div class="form-row" id="kwdsRow" style="transition: opacity 0.25s;">
           <input type="text" id="includeKwds" class="form-control" placeholder="포함 (예: 복구, 지원)">
           <input type="text" id="excludeKwds" class="form-control" placeholder="제외 (예: 운전, 주차)">
         </div>
       </div>
 
       <div class="form-group">
-        <label>📅 활동 지정일 (Target Date)</label>
-        <input type="date" id="targetDate" class="form-control">
+        <div class="form-header-row">
+          <label style="font-weight: 600; display: flex; align-items: center; gap: 0.35rem;">
+            <span>📅 활동 지정일 (Target Date)</span>
+          </label>
+          <label class="toggle-switch-wrapper" title="활동 지정일 필터 전원 On/Off">
+            <span id="dateStatusBadge" style="font-size: 0.72rem; color: var(--accent-amber); font-weight: 600;"></span>
+            <input type="checkbox" id="useTargetDate" class="toggle-checkbox" checked>
+            <span class="toggle-switch"></span>
+          </label>
+        </div>
+        <input type="date" id="targetDate" class="form-control" max="9999-12-31" style="transition: opacity 0.25s;">
       </div>
 
       <div class="form-group">
@@ -754,8 +864,8 @@
     <section class="panel">
       <div class="results-header">
         <div>
-          <h2 class="panel-title" style="margin-bottom: 0; border: none; padding: 0;">📊 자원봉사 목록</h2>
-          <div style="font-size: 0.825rem; color: var(--text-muted); margin-top: 0.3rem;">
+          <h2 class="panel-title" id="resultsPanelTitle" style="margin-bottom: 0; border: none; padding: 0;">📊 자원봉사 목록</h2>
+          <div id="resultsCountInfo" style="font-size: 0.825rem; color: var(--text-muted); margin-top: 0.3rem;">
             원천 수집: <strong id="totalCount" style="color: var(--accent-blue);">0</strong>건 | ⚡ 필터링 적용: <strong
               id="filteredCount" style="color: var(--accent-emerald); font-size: 1rem;">0</strong>건
           </div>
@@ -839,8 +949,10 @@
   <script>
     // Global State
     let windowRawData = [];
-    let bookmarks = JSON.parse(localStorage.getItem('1365_bookmarks') || '[]');
-    let hiddenItems = JSON.parse(localStorage.getItem('1365_hidden') || '[]');
+    let bookmarks = [...new Set(JSON.parse(localStorage.getItem('1365_bookmarks') || '[]'))];
+    let hiddenItems = [...new Set(JSON.parse(localStorage.getItem('1365_hidden') || '[]'))];
+    let bookmarkDetails = JSON.parse(localStorage.getItem('1365_bookmark_details') || '{}');
+    let latestTotalCount = 0;
     let currentTab = 'all';
     let displayLimit = 20;
     let currentPage = 1;
@@ -864,7 +976,19 @@
           const parsed = JSON.parse(cached);
           if (parsed && parsed.items && parsed.items.length > 0) {
             windowRawData = parsed.items;
-            document.getElementById('totalCount').textContent = parsed.totalCount || parsed.items.length;
+            latestTotalCount = parsed.totalCount || parsed.items.length;
+            const tElem = document.getElementById('totalCount');
+            if (tElem) tElem.textContent = latestTotalCount;
+
+            // Cache details for currently known bookmarks
+            windowRawData.forEach(item => {
+              if (bookmarks.includes(item.progrmRegistNo)) {
+                bookmarkDetails[item.progrmRegistNo] = item;
+              }
+            });
+            try {
+              localStorage.setItem('1365_bookmark_details', JSON.stringify(bookmarkDetails));
+            } catch (e) {}
 
             // 캐시 안내 배지
             const badgesContainer = document.getElementById('activeFilterBadges');
@@ -882,12 +1006,37 @@
       const idx = bookmarks.indexOf(regNo);
       if (idx > -1) {
         bookmarks.splice(idx, 1);
+        delete bookmarkDetails[regNo];
       } else {
         bookmarks.push(regNo);
+        const item = windowRawData.find(it => it.progrmRegistNo === regNo);
+        if (item) bookmarkDetails[regNo] = item;
       }
       localStorage.setItem('1365_bookmarks', JSON.stringify(bookmarks));
+      try {
+        localStorage.setItem('1365_bookmark_details', JSON.stringify(bookmarkDetails));
+      } catch (e) {}
       updateBookmarkCount();
       applyFiltersAndRender(false); // 관심 등록 토글 시 현재 페이지 위치 유지
+    }
+
+    function cleanMissingBookmarks() {
+      const rawIds = new Set(windowRawData.map(d => d.progrmRegistNo));
+      const missing = bookmarks.filter(id => !rawIds.has(id));
+      if (missing.length === 0) {
+        alert('원천 데이터에 미포함된 과거 관심 공고가 없습니다.');
+        return;
+      }
+      if (confirm(`현재 1365 원천 데이터 목록에 없는 과거 관심 공고 ${missing.length}건을 정리하시겠습니까?\n(공고 번호: ${missing.join(', ')})`)) {
+        bookmarks = bookmarks.filter(id => rawIds.has(id));
+        missing.forEach(id => delete bookmarkDetails[id]);
+        localStorage.setItem('1365_bookmarks', JSON.stringify(bookmarks));
+        try {
+          localStorage.setItem('1365_bookmark_details', JSON.stringify(bookmarkDetails));
+        } catch (e) {}
+        updateBookmarkCount();
+        applyFiltersAndRender(false);
+      }
     }
 
     function toggleHide(regNo, e) {
@@ -981,8 +1130,19 @@
         const text = await resp.text();
         const { totalCount, items } = parseXml(text);
 
+        latestTotalCount = totalCount;
         document.getElementById('totalCount').textContent = totalCount;
         windowRawData = items;
+
+        // Cache details for currently known bookmarks
+        windowRawData.forEach(item => {
+          if (bookmarks.includes(item.progrmRegistNo)) {
+            bookmarkDetails[item.progrmRegistNo] = item;
+          }
+        });
+        try {
+          localStorage.setItem('1365_bookmark_details', JSON.stringify(bookmarkDetails));
+        } catch (e) {}
 
         // Save to localStorage for instant F5 restoration
         try {
@@ -1028,9 +1188,16 @@
       const youthPosbl = document.getElementById('youthPosbl').checked;
       const sidoCd = document.getElementById('sidoSelect').value;
       const locText = document.getElementById('locText').value.trim();
-      const includeKwds = document.getElementById('includeKwds').value.trim().split(',').map(s => s.trim()).filter(Boolean);
-      const excludeKwds = document.getElementById('excludeKwds').value.trim().split(',').map(s => s.trim()).filter(Boolean);
-      const targetDate = document.getElementById('targetDate').value.replace(/-/g, '');
+
+      const useKwds = document.getElementById('useKwds').checked;
+      const rawIncludeKwds = document.getElementById('includeKwds').value.trim();
+      const rawExcludeKwds = document.getElementById('excludeKwds').value.trim();
+      const includeKwds = useKwds ? rawIncludeKwds.split(',').map(s => s.trim()).filter(Boolean) : [];
+      const excludeKwds = useKwds ? rawExcludeKwds.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+      const useTargetDate = document.getElementById('useTargetDate').checked;
+      const rawTargetDate = document.getElementById('targetDate').value;
+      const targetDate = useTargetDate ? rawTargetDate.replace(/-/g, '') : '';
       const sortBy = document.getElementById('sortBy').value;
       const sortOrder1 = document.getElementById('sortOrder1').value;
       const sortBy2 = document.getElementById('sortBy2').value;
@@ -1136,8 +1303,94 @@
         return 0;
       });
 
+      // Missing bookmarks handling (원천 데이터에 없는 과거 북마크 항목 보존 및 표시)
+      const rawIds = new Set(windowRawData.map(d => d.progrmRegistNo));
+      const missingBookmarkIds = bookmarks.filter(id => !rawIds.has(id));
+
+      if (currentTab === 'bookmark' && missingBookmarkIds.length > 0) {
+        const missingItems = missingBookmarkIds.map(regNo => {
+          const cached = bookmarkDetails[regNo] || {};
+          return {
+            progrmRegistNo: regNo,
+            progrmSj: cached.progrmSj || '1365 원천 목록에서 만료/종료된 봉사활동',
+            locationName: cached.locationName || '전국 (기존 저장)',
+            mnnstNm: cached.mnnstNm || '',
+            nanmmbyNm: cached.nanmmbyNm || '1365 원천 미포함',
+            noticeBgnde: cached.noticeBgnde || '',
+            noticeEndde: cached.noticeEndde || '',
+            progrmBgnde: cached.progrmBgnde || '',
+            progrmEndde: cached.progrmEndde || '',
+            actBeginTm: cached.actBeginTm || '',
+            actEndTm: cached.actEndTm || '',
+            _isMissingFromRaw: true
+          };
+        });
+        filtered = filtered.concat(missingItems);
+      }
+
       currentFilteredItems = filtered;
-      document.getElementById('filteredCount').textContent = filtered.length;
+      const filteredCountElem = document.getElementById('filteredCount');
+      if (filteredCountElem) filteredCountElem.textContent = filtered.length;
+
+      // Header title & count text synchronization by tab
+      const resultsPanelTitle = document.getElementById('resultsPanelTitle');
+      const resultsCountInfo = document.getElementById('resultsCountInfo');
+
+      if (currentTab === 'bookmark') {
+        if (resultsPanelTitle) resultsPanelTitle.textContent = '⭐ 관심 봉사 목록';
+        if (resultsCountInfo) {
+          if (missingBookmarkIds.length > 0) {
+            resultsCountInfo.innerHTML = `
+              ⭐ 등록된 관심 봉사: <strong style="color: var(--accent-amber); font-size: 1rem;">${bookmarks.length}</strong>건
+              (현재 수집 데이터 일치: <strong style="color: var(--accent-emerald);">${bookmarks.length - missingBookmarkIds.length}</strong>건 |
+              ⚠️ 원천 데이터 미포함: <strong style="color: #f43f5e;">${missingBookmarkIds.length}</strong>건)
+              <button onclick="cleanMissingBookmarks()" style="margin-left: 0.6rem; padding: 0.2rem 0.6rem; font-size: 0.75rem; font-weight: 600; background: rgba(244,63,94,0.15); color: #f43f5e; border: 1px solid rgba(244,63,94,0.3); border-radius: 4px; cursor: pointer; transition: all 0.2s;">🗑️ 미포함 ${missingBookmarkIds.length}건 일괄 정리</button>
+            `;
+          } else {
+            resultsCountInfo.innerHTML = `
+              ⭐ 등록된 관심 봉사: <strong style="color: var(--accent-amber); font-size: 1rem;">${bookmarks.length}</strong>건 (전체 표시 중)
+            `;
+          }
+        }
+      } else if (currentTab === 'hidden') {
+        if (resultsPanelTitle) resultsPanelTitle.textContent = '🚫 숨김 봉사 목록 (블랙리스트)';
+        if (resultsCountInfo) {
+          resultsCountInfo.innerHTML = `
+            🚫 등록된 숨김 봉사: <strong style="color: #f43f5e; font-size: 1rem;">${hiddenItems.length}</strong>건 | ⚡ 표시 중: <strong style="color: var(--accent-emerald);">${filtered.length}</strong>건
+          `;
+        }
+      } else {
+        if (resultsPanelTitle) resultsPanelTitle.textContent = '📊 자원봉사 목록';
+        if (resultsCountInfo) {
+          const tot = latestTotalCount || document.getElementById('totalCount')?.textContent || windowRawData.length;
+          resultsCountInfo.innerHTML = `
+            원천 수집: <strong id="totalCount" style="color: var(--accent-blue);">${tot}</strong>건 | ⚡ 필터링 적용: <strong id="filteredCount" style="color: var(--accent-emerald); font-size: 1rem;">${filtered.length}</strong>건
+          `;
+        }
+      }
+
+      // Visual feedback & status badges for Keywords & Date toggles
+      const kwdBadge = document.getElementById('kwdStatusBadge');
+      const kwdsRow = document.getElementById('kwdsRow');
+      if (kwdsRow) kwdsRow.style.opacity = useKwds ? '1' : '0.45';
+      if (kwdBadge) {
+        if (!useKwds && (rawIncludeKwds || rawExcludeKwds)) {
+          kwdBadge.textContent = '🔒 값 보존';
+        } else {
+          kwdBadge.textContent = '';
+        }
+      }
+
+      const dateBadge = document.getElementById('dateStatusBadge');
+      const targetDateInput = document.getElementById('targetDate');
+      if (targetDateInput) targetDateInput.style.opacity = useTargetDate ? '1' : '0.45';
+      if (dateBadge) {
+        if (!useTargetDate && rawTargetDate) {
+          dateBadge.textContent = '🔒 날짜 보존';
+        } else {
+          dateBadge.textContent = '';
+        }
+      }
 
       // Active filter badges
       const badgesContainer = document.getElementById('activeFilterBadges');
@@ -1147,9 +1400,9 @@
       if (youthPosbl) badges.push('<span class="tag tag-emerald">✓ 청소년가능</span>');
       if (sidoCd) badges.push(`<span class="tag tag-amber">📍 시/도: ${AREA_MAPPER.SIDO_MAP[sidoCd] || sidoCd}</span>`);
       if (locText) badges.push(`<span class="tag tag-amber">📍 지역: ${locText}</span>`);
-      if (includeKwds.length > 0) badges.push(`<span class="tag tag-purple">🔍 포함: ${includeKwds.join(', ')}</span>`);
-      if (excludeKwds.length > 0) badges.push(`<span class="tag tag-amber" style="color:#f43f5e; border-color:#f43f5e;">🚫 제외: ${excludeKwds.join(', ')}</span>`);
-      if (targetDate) badges.push(`<span class="tag tag-amber">📅 날짜: ${document.getElementById('targetDate').value}</span>`);
+      if (useKwds && includeKwds.length > 0) badges.push(`<span class="tag tag-purple">🔍 포함: ${includeKwds.join(', ')}</span>`);
+      if (useKwds && excludeKwds.length > 0) badges.push(`<span class="tag tag-amber" style="color:#f43f5e; border-color:#f43f5e;">🚫 제외: ${excludeKwds.join(', ')}</span>`);
+      if (useTargetDate && targetDate) badges.push(`<span class="tag tag-amber">📅 날짜: ${rawTargetDate}</span>`);
 
       badgesContainer.innerHTML = badges.join('');
       renderCardsList();
@@ -1190,6 +1443,9 @@
         const dDayInfo = calculateDDay(item.noticeEndde);
         const dDayBadge = dDayInfo ? `<span class="tag ${dDayInfo.badgeClass}" style="font-weight: 700;">${dDayInfo.label}</span>` : '';
 
+        const isMissing = !!item._isMissingFromRaw;
+        const missingBadge = isMissing ? '<span class="tag tag-rose" style="background: rgba(244,63,94,0.18); color:#f43f5e; border: 1px solid rgba(244,63,94,0.35); font-weight: 700;">⚠️ 1365 원천 미포함</span>' : '';
+
         const isBm = bookmarks.includes(regNo);
         const isHd = hiddenItems.includes(regNo);
         const bmClass = isBm ? 'active' : '';
@@ -1198,7 +1454,7 @@
         const hideBadge = isHd ? '<span class="tag tag-rose" style="background: rgba(244,63,94,0.2); color:#f43f5e;">🚫 숨김 처리됨</span>' : '';
 
         return `
-          <div class="item-card ${cardBmClass}">
+          <div class="item-card ${cardBmClass}" ${isMissing ? 'style="border-color: rgba(244,63,94,0.35); background: rgba(30, 41, 59, 0.7);"' : ''}>
             <button class="hide-btn ${hideClass}" title="${isHd ? '숨기기 해제' : '관심 없음 (숨기기)'}" onclick="toggleHide('${regNo}', event)">
               🚫
             </button>
@@ -1208,6 +1464,7 @@
             <div>
               <div class="tag-container" style="margin-bottom: 0.6rem;">
                 <span class="tag tag-amber">NO. ${regNo}</span>
+                ${missingBadge}
                 ${dDayBadge}
                 ${hideBadge}
                 ${adult}
@@ -1217,28 +1474,38 @@
             </div>
 
             <div class="item-meta">
-              <div class="meta-row">
-                <span class="meta-icon">📍</span> <strong style="color: var(--accent-blue);">${locName}</strong>
-              </div>
-              <div class="meta-row">
-                <span class="meta-icon">🏢</span> ${org}
-              </div>
-              <div class="meta-row">
-                <span class="meta-icon">📢</span> <span style="color: var(--accent-amber); font-weight: 500;">모집: ${noticePeriod}</span>
-              </div>
-              <div class="meta-row">
-                <span class="meta-icon">📅</span> <span style="color: var(--accent-emerald); font-weight: 500;">봉사: ${progrmPeriod}</span>
-              </div>
-              <div class="meta-row">
-                <span class="meta-icon">⏰</span> <span style="color: var(--accent-purple); font-weight: 500;">시간: ${actTime}</span>
-              </div>
+              ${isMissing ? `
+                <div class="meta-row" style="color: #fca5a5; font-size: 0.8rem; line-height: 1.45; background: rgba(244,63,94,0.1); padding: 0.6rem; border-radius: 6px; border: 1px solid rgba(244,63,94,0.25);">
+                  ⚠️ 현재 수집된 1365 원천 목록(10,573건)에 포함되어 있지 않은 과거 관심 공고입니다. (1365 포털에서 모집 마감 또는 삭제됨)
+                </div>
+              ` : `
+                <div class="meta-row">
+                  <span class="meta-icon">📍</span> <strong style="color: var(--accent-blue);">${locName}</strong>
+                </div>
+                <div class="meta-row">
+                  <span class="meta-icon">🏢</span> ${org}
+                </div>
+                <div class="meta-row">
+                  <span class="meta-icon">📢</span> <span style="color: var(--accent-amber); font-weight: 500;">모집: ${noticePeriod}</span>
+                </div>
+                <div class="meta-row">
+                  <span class="meta-icon">📅</span> <span style="color: var(--accent-emerald); font-weight: 500;">봉사: ${progrmPeriod}</span>
+                </div>
+                <div class="meta-row">
+                  <span class="meta-icon">⏰</span> <span style="color: var(--accent-purple); font-weight: 500;">시간: ${actTime}</span>
+                </div>
+              `}
             </div>
 
             <div class="card-footer">
               <a href="${item.url || 'https://www.1365.go.kr/vols/P9210/partcptn/timeCptn.do?type=show&progrmRegistNo=' + regNo}" target="_blank" style="font-size: 0.78rem; color: var(--accent-blue); text-decoration: none; display: inline-flex; align-items: center; gap: 0.2rem; font-weight: 500;">
-                🔗 1365 신청하기
+                🔗 1365 포털에서 확인
               </a>
-              <button class="btn-detail" onclick="openDetail('${regNo}')">상세보기</button>
+              ${isMissing ? `
+                <button class="btn-detail" onclick="toggleBookmark('${regNo}', event)" style="background: rgba(244,63,94,0.15); color: #f43f5e; border: 1px solid rgba(244,63,94,0.35);">관심 목록에서 삭제</button>
+              ` : `
+                <button class="btn-detail" onclick="openDetail('${regNo}')">상세보기</button>
+              `}
             </div>
           </div>
         `;
@@ -1349,16 +1616,32 @@
     }
 
     // 1. 체크박스 / 드롭다운 / 날짜 ➔ 클릭 즉시 0초 실시간반영
-    ['recruitingOnly', 'adultPosbl', 'youthPosbl', 'sidoSelect', 'targetDate', 'sortBy', 'sortOrder1', 'sortBy2', 'sortOrder2', 'sortBy3', 'sortOrder3'].forEach(id => {
+    ['recruitingOnly', 'adultPosbl', 'youthPosbl', 'sidoSelect', 'useKwds', 'useTargetDate', 'targetDate', 'sortBy', 'sortOrder1', 'sortBy2', 'sortOrder2', 'sortBy3', 'sortOrder3'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.addEventListener('change', applyFiltersAndRender);
     });
 
-    // 2. 텍스트 입력창 ➔ 300ms 디바운스 유예 적용 (타이핑 시 깜빡임 100% 방지)
+    // 2. 날짜 선택 시 자동으로 useTargetDate 켜짐
+    const targetDateEl = document.getElementById('targetDate');
+    if (targetDateEl) {
+      targetDateEl.addEventListener('change', () => {
+        if (targetDateEl.value && !document.getElementById('useTargetDate').checked) {
+          document.getElementById('useTargetDate').checked = true;
+        }
+        applyFiltersAndRender();
+      });
+    }
+
+    // 3. 텍스트 입력창 ➔ 300ms 디바운스 유예 적용 (타이핑 시 깜빡임 100% 방지)
     ['locText', 'includeKwds', 'excludeKwds'].forEach(id => {
       const el = document.getElementById(id);
       if (el) {
-        el.addEventListener('input', debouncedFilter);
+        el.addEventListener('input', () => {
+          if ((id === 'includeKwds' || id === 'excludeKwds') && el.value.trim() && !document.getElementById('useKwds').checked) {
+            document.getElementById('useKwds').checked = true;
+          }
+          debouncedFilter();
+        });
         el.addEventListener('change', applyFiltersAndRender);
       }
     });
