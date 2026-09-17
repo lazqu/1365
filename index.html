@@ -37,26 +37,35 @@
       padding: 0;
     }
 
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
       font-family: 'Noto Sans KR', 'Plus Jakarta Sans', sans-serif;
       background: var(--bg-primary);
       color: var(--text-main);
       line-height: 1.6;
-      min-height: 100vh;
       background-image:
         radial-gradient(at 10% 10%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
         radial-gradient(at 90% 90%, rgba(139, 92, 246, 0.15) 0px, transparent 50%);
       background-attachment: fixed;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
 
     header {
+      flex-shrink: 0;
       background: var(--glass-bg);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--glass-border);
-      position: sticky;
-      top: 0;
+      position: relative;
       z-index: 100;
-      padding: 1rem 2rem;
+      padding: 0.85rem 2rem;
     }
 
     .header-content {
@@ -122,26 +131,85 @@
     }
 
     main {
-      max-width: 1400px;
-      margin: 2rem auto;
-      padding: 0 1.5rem;
+      flex: 1;
+      width: 100%;
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 1rem 1.5rem 1.25rem 1.5rem;
       display: grid;
       grid-template-columns: 360px 1fr;
-      gap: 1.5rem;
-    }
-
-    @media (max-width: 1024px) {
-      main {
-        grid-template-columns: 1fr;
-      }
+      gap: 1.25rem;
+      overflow: hidden;
+      min-height: 0;
     }
 
     .panel {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
       border-radius: var(--radius);
-      padding: 1.5rem;
       box-shadow: var(--shadow);
+      min-height: 0;
+    }
+
+    .panel-sidebar {
+      padding: 1.5rem;
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    .panel-results {
+      padding: 0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    @media (max-width: 1024px) {
+
+      html,
+      body {
+        height: auto;
+        overflow: auto;
+      }
+
+      body {
+        min-height: 100vh;
+      }
+
+      header {
+        position: sticky;
+        top: 0;
+      }
+
+      main {
+        height: auto;
+        overflow: visible;
+        grid-template-columns: 1fr;
+        padding: 1rem;
+      }
+
+      .panel-sidebar {
+        height: auto;
+        max-height: 75vh;
+        overflow-y: auto;
+      }
+
+      .panel-results {
+        height: auto;
+        overflow: visible;
+      }
+
+      .results-scroll-area {
+        overflow-y: visible !important;
+        max-height: none !important;
+        padding: 1rem 0 !important;
+      }
+
+      .pagination-footer {
+        position: sticky;
+        bottom: 0;
+      }
     }
 
     .panel-title {
@@ -368,13 +436,234 @@
       box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
     }
 
+    /* 🔀 Notion-style Dynamic Sort Blocks */
+    .sort-blocks-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .sort-block {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.4rem 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .sort-block:hover {
+      border-color: rgba(148, 163, 184, 0.45);
+      background: rgba(30, 41, 59, 0.95);
+    }
+
+    .sort-block.dragging {
+      opacity: 0.4;
+      transform: scale(0.98);
+      border: 1px dashed var(--accent-blue);
+    }
+
+    .sort-block.drag-over {
+      border-top: 2px solid var(--accent-blue);
+      box-shadow: 0 -3px 8px rgba(59, 130, 246, 0.3);
+    }
+
+    .sort-drag-handle {
+      cursor: grab;
+      color: var(--text-muted);
+      font-size: 1rem;
+      padding: 0 0.15rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.15s;
+    }
+
+    .sort-drag-handle:active {
+      cursor: grabbing;
+    }
+
+    .sort-drag-handle:hover {
+      color: var(--text-main);
+    }
+
+    .sort-rank-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--accent-blue);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .sort-field-select {
+      flex: 1.2;
+      min-width: 90px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 0.35rem 0.45rem;
+      color: var(--text-main);
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .sort-order-select {
+      flex: 1.1;
+      min-width: 85px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 0.35rem 0.45rem;
+      color: var(--text-main);
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .sort-action-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      flex-shrink: 0;
+      padding: 0;
+    }
+
+    .sort-action-btn:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+      border-color: var(--border-color);
+    }
+
+    .sort-action-btn:disabled {
+      opacity: 0.2;
+      cursor: not-allowed;
+    }
+
+    .sort-action-btn.btn-delete:hover {
+      background: rgba(244, 63, 94, 0.15);
+      color: #f43f5e;
+      border-color: rgba(244, 63, 94, 0.3);
+    }
+
+    .btn-add-sort {
+      width: 100%;
+      background: rgba(30, 41, 59, 0.45);
+      border: 1px dashed rgba(148, 163, 184, 0.3);
+      border-radius: 8px;
+      padding: 0.45rem 0.75rem;
+      color: var(--text-muted);
+      font-size: 0.825rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      transition: all 0.2s;
+    }
+
+    .btn-add-sort:hover:not(:disabled) {
+      border-color: var(--accent-blue);
+      color: var(--accent-blue);
+      background: rgba(59, 130, 246, 0.08);
+    }
+
+    .btn-add-sort:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
     .results-header {
+      flex-shrink: 0;
+      padding: 1.25rem 1.5rem 1rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(30, 41, 59, 0.75);
+      backdrop-filter: blur(10px);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1.25rem;
       flex-wrap: wrap;
       gap: 1rem;
+      z-index: 10;
+    }
+
+    .results-scroll-area {
+      flex: 1;
+      overflow-y: auto;
+      min-height: 0;
+      padding: 1.25rem 1.5rem;
+    }
+
+    .pagination-footer {
+      flex-shrink: 0;
+      padding: 0.75rem 1.5rem;
+      border-top: 1px solid var(--border-color);
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(10px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.4rem;
+      z-index: 10;
+    }
+
+    /* 🌟 Sleek Custom Scrollbars */
+    .panel-sidebar::-webkit-scrollbar,
+    .results-scroll-area::-webkit-scrollbar,
+    .modal-content::-webkit-scrollbar,
+    .detail-desc::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    .panel-sidebar::-webkit-scrollbar-track,
+    .results-scroll-area::-webkit-scrollbar-track,
+    .modal-content::-webkit-scrollbar-track,
+    .detail-desc::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.4);
+      border-radius: 4px;
+    }
+
+    .panel-sidebar::-webkit-scrollbar-thumb,
+    .results-scroll-area::-webkit-scrollbar-thumb,
+    .modal-content::-webkit-scrollbar-thumb,
+    .detail-desc::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.25);
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+
+    .panel-sidebar::-webkit-scrollbar-thumb:hover,
+    .results-scroll-area::-webkit-scrollbar-thumb:hover,
+    .modal-content::-webkit-scrollbar-thumb:hover,
+    .detail-desc::-webkit-scrollbar-thumb:hover {
+      background: rgba(148, 163, 184, 0.5);
+    }
+
+    .panel-sidebar,
+    .results-scroll-area,
+    .modal-content,
+    .detail-desc {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(148, 163, 184, 0.3) rgba(15, 23, 42, 0.4);
     }
 
     .results-tabs {
@@ -733,7 +1022,7 @@
 
   <main>
     <!-- Left Control Panel -->
-    <section class="panel">
+    <section class="panel panel-sidebar">
       <!-- 1단계: 원천 데이터 수집 -->
       <div class="panel-title">
         <span>📥 [1단계] 원천 데이터</span>
@@ -834,53 +1123,30 @@
       </div>
 
       <div class="form-group">
-        <label>🔀 3단계 다중 정렬 파이프라인 (1차 / 2차 / 3차)</label>
-        <!-- 1차 정렬 -->
-        <div class="form-row" style="margin-bottom: 0.5rem;">
-          <select id="sortBy" class="form-control">
-            <option value="noticeEndde">1차: 모집마감일 순</option>
-            <option value="progrmBgnde">1차: 봉사시작일 순</option>
-            <option value="progrmEndde">1차: 봉사종료일 순</option>
-            <option value="progrmSj">1차: 제목 순</option>
-          </select>
-          <select id="sortOrder1" class="form-control">
-            <option value="asc">1차: 오름차순 (임박한 순 ⬆️)</option>
-            <option value="desc">1차: 내림차순 (나중 순 ⬇️)</option>
-          </select>
+        <div class="form-header-row" style="margin-bottom: 0.4rem;">
+          <label style="font-weight: 600; margin-bottom: 0; display: flex; align-items: center; gap: 0.35rem;">
+            <span>🔀 정렬</span>
+          </label>
+          <label class="toggle-switch-wrapper" title="정렬 기능 전원 On/Off (끄면 원천 수집 순서로 표시)">
+            <span id="sortStatusBadge" style="font-size: 0.72rem; color: var(--accent-amber); font-weight: 600;"></span>
+            <input type="checkbox" id="useSorting" class="toggle-checkbox" checked>
+            <span class="toggle-switch"></span>
+          </label>
         </div>
-        <!-- 2차 정렬 -->
-        <div class="form-row" style="margin-bottom: 0.5rem;">
-          <select id="sortBy2" class="form-control">
-            <option value="">2차: 정렬 없음 (선택)</option>
-            <option value="progrmBgnde">2차: 봉사시작일 순</option>
-            <option value="progrmEndde">2차: 봉사종료일 순</option>
-            <option value="noticeEndde">2차: 모집마감일 순</option>
-            <option value="progrmSj">2차: 제목 순</option>
-          </select>
-          <select id="sortOrder2" class="form-control">
-            <option value="asc">2차: 오름차순 ⬆️</option>
-            <option value="desc">2차: 내림차순 ⬇️</option>
-          </select>
-        </div>
-        <!-- 3차 정렬 -->
-        <div class="form-row">
-          <select id="sortBy3" class="form-control">
-            <option value="">3차: 정렬 없음 (선택)</option>
-            <option value="progrmSj">3차: 제목 순</option>
-            <option value="progrmBgnde">3차: 봉사시작일 순</option>
-            <option value="progrmEndde">3차: 봉사종료일 순</option>
-            <option value="noticeEndde">3차: 모집마감일 순</option>
-          </select>
-          <select id="sortOrder3" class="form-control">
-            <option value="asc">3차: 오름차순 ⬆️</option>
-            <option value="desc">3차: 내림차순 ⬇️</option>
-          </select>
+        <div id="sortControlsWrapper" style="transition: opacity 0.25s;">
+          <div style="display: flex; justify-content: flex-end; margin-bottom: 0.3rem;">
+            <span style="font-size: 0.72rem; color: var(--text-muted);">⠿ 드래그 / ▲▼ 이동</span>
+          </div>
+          <div id="sortBlocksList" class="sort-blocks-list"></div>
+          <button type="button" id="btnAddSort" class="btn-add-sort" onclick="addSortRule()">
+            <span>➕ 정렬 기준 추가</span>
+          </button>
         </div>
       </div>
     </section>
 
     <!-- Right Results Panel -->
-    <section class="panel">
+    <section class="panel panel-results">
       <div class="results-header">
         <div>
           <h2 class="panel-title" id="resultsPanelTitle" style="margin-bottom: 0; border: none; padding: 0;">📊 자원봉사 목록
@@ -899,11 +1165,17 @@
         </div>
       </div>
 
-      <div id="resultsContainer" class="card-grid">
-        <div style="grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; color: var(--text-muted);">
-          좌측의 <strong>[🚀 1365 원천 데이터 1회 수집]</strong> 버튼을 클릭하여 데이터를 불러오세요.
+      <!-- 독립 내부 스크롤 영역 -->
+      <div class="results-scroll-area">
+        <div id="resultsContainer" class="card-grid">
+          <div style="grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; color: var(--text-muted);">
+            좌측의 <strong>[🚀 1365 원천 데이터 1회 수집]</strong> 버튼을 클릭하여 데이터를 불러오세요.
+          </div>
         </div>
       </div>
+
+      <!-- 고정 하단 페이지네이션 바 -->
+      <div id="paginationContainer" class="pagination-footer" style="display: none;"></div>
     </section>
   </main>
 
@@ -987,6 +1259,195 @@
       document.getElementById('hiddenCount').textContent = hiddenItems.length;
     }
     updateHiddenCount();
+
+    // 🔀 Notion-style Dynamic Sort Rules Engine
+    const SORT_FIELD_OPTIONS = [
+      { value: 'noticeEndde', label: '모집마감일' },
+      { value: 'noticeBgnde', label: '모집시작일' },
+      { value: 'progrmBgnde', label: '봉사시작일' },
+      { value: 'progrmEndde', label: '봉사종료일' },
+      { value: 'progrmSj', label: '공고제목' }
+    ];
+
+    let sortRules = [
+      { id: 'sr_1', field: 'noticeEndde', order: 'asc' }
+    ];
+
+    try {
+      const savedSort = localStorage.getItem('1365_sort_rules');
+      if (savedSort) {
+        const parsed = JSON.parse(savedSort);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          sortRules = parsed;
+        }
+      }
+    } catch (e) { }
+
+    function saveSortRules() {
+      try {
+        localStorage.setItem('1365_sort_rules', JSON.stringify(sortRules));
+      } catch (e) { }
+    }
+
+    function renderSortBlocks() {
+      const container = document.getElementById('sortBlocksList');
+      if (!container) return;
+
+      const addBtn = document.getElementById('btnAddSort');
+      if (addBtn) {
+        const usedFields = new Set(sortRules.map(r => r.field));
+        const canAdd = SORT_FIELD_OPTIONS.some(opt => !usedFields.has(opt.value)) && sortRules.length < SORT_FIELD_OPTIONS.length;
+        addBtn.disabled = !canAdd;
+        addBtn.title = canAdd ? '새 정렬 기준 블록 추가' : '모든 정렬 기준이 이미 추가되었습니다';
+      }
+
+      if (sortRules.length === 0) {
+        container.innerHTML = `
+          <div style="font-size: 0.78rem; color: var(--text-muted); text-align: center; padding: 0.75rem; border: 1px dashed var(--border-color); border-radius: 6px; background: rgba(15,23,42,0.3);">
+            정렬 기준 없음 (원천 수집 순서)
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = sortRules.map((rule, idx) => {
+        const rank = idx + 1;
+        const isFirst = idx === 0;
+        const isLast = idx === sortRules.length - 1;
+
+        const fieldOptsHtml = SORT_FIELD_OPTIONS.map(opt => `
+          <option value="${opt.value}" ${opt.value === rule.field ? 'selected' : ''}>${opt.label}</option>
+        `).join('');
+
+        return `
+          <div class="sort-block" draggable="true" data-index="${idx}" id="sortBlock_${rule.id}">
+            <div class="sort-drag-handle" title="끌어서 순서 변경 (드래그)">⠿</div>
+            <span class="sort-rank-badge">${rank}차</span>
+            <select class="sort-field-select" onchange="updateSortRuleField(${idx}, this.value)">
+              ${fieldOptsHtml}
+            </select>
+            <select class="sort-order-select" onchange="updateSortRuleOrder(${idx}, this.value)">
+              <option value="asc" ${rule.order === 'asc' ? 'selected' : ''}>오름차순 ⬆️</option>
+              <option value="desc" ${rule.order === 'desc' ? 'selected' : ''}>내림차순 ⬇️</option>
+            </select>
+            <button type="button" class="sort-action-btn" title="위로 이동" ${isFirst ? 'disabled' : ''} onclick="moveSortRule(${idx}, -1)">▲</button>
+            <button type="button" class="sort-action-btn" title="아래로 이동" ${isLast ? 'disabled' : ''} onclick="moveSortRule(${idx}, 1)">▼</button>
+            <button type="button" class="sort-action-btn btn-delete" title="정렬 기준 삭제" onclick="deleteSortRule(${idx})">✕</button>
+          </div>
+        `;
+      }).join('');
+
+      initSortBlockDragAndDrop();
+    }
+
+    function initSortBlockDragAndDrop() {
+      const blocks = document.querySelectorAll('.sort-block');
+      let draggedIdx = null;
+
+      blocks.forEach(block => {
+        block.addEventListener('dragstart', (e) => {
+          draggedIdx = parseInt(block.getAttribute('data-index'), 10);
+          block.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', draggedIdx);
+        });
+
+        block.addEventListener('dragend', () => {
+          block.classList.remove('dragging');
+          blocks.forEach(b => b.classList.remove('drag-over'));
+        });
+
+        block.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          const targetIdx = parseInt(block.getAttribute('data-index'), 10);
+          if (draggedIdx !== null && draggedIdx !== targetIdx) {
+            block.classList.add('drag-over');
+          }
+        });
+
+        block.addEventListener('dragleave', () => {
+          block.classList.remove('drag-over');
+        });
+
+        block.addEventListener('drop', (e) => {
+          e.preventDefault();
+          block.classList.remove('drag-over');
+          const targetIdx = parseInt(block.getAttribute('data-index'), 10);
+          if (draggedIdx !== null && draggedIdx !== targetIdx) {
+            const [movedItem] = sortRules.splice(draggedIdx, 1);
+            sortRules.splice(targetIdx, 0, movedItem);
+            saveSortRules();
+            renderSortBlocks();
+            applyFiltersAndRender(false);
+          }
+        });
+      });
+    }
+
+    function autoEnableSorting() {
+      const el = document.getElementById('useSorting');
+      if (el && !el.checked) {
+        el.checked = true;
+      }
+    }
+
+    function addSortRule() {
+      autoEnableSorting();
+      const usedFields = new Set(sortRules.map(r => r.field));
+      const nextOpt = SORT_FIELD_OPTIONS.find(opt => !usedFields.has(opt.value));
+      if (!nextOpt) return;
+
+      sortRules.push({
+        id: 'sr_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        field: nextOpt.value,
+        order: 'asc'
+      });
+      saveSortRules();
+      renderSortBlocks();
+      applyFiltersAndRender(false);
+    }
+
+    function deleteSortRule(idx) {
+      autoEnableSorting();
+      sortRules.splice(idx, 1);
+      saveSortRules();
+      renderSortBlocks();
+      applyFiltersAndRender(false);
+    }
+
+    function moveSortRule(idx, dir) {
+      autoEnableSorting();
+      const newIdx = idx + dir;
+      if (newIdx < 0 || newIdx >= sortRules.length) return;
+      const temp = sortRules[idx];
+      sortRules[idx] = sortRules[newIdx];
+      sortRules[newIdx] = temp;
+      saveSortRules();
+      renderSortBlocks();
+      applyFiltersAndRender(false);
+    }
+
+    function updateSortRuleField(idx, newField) {
+      autoEnableSorting();
+      if (sortRules[idx]) {
+        sortRules[idx].field = newField;
+        saveSortRules();
+        renderSortBlocks();
+        applyFiltersAndRender(false);
+      }
+    }
+
+    function updateSortRuleOrder(idx, newOrder) {
+      autoEnableSorting();
+      if (sortRules[idx]) {
+        sortRules[idx].order = newOrder;
+        saveSortRules();
+        applyFiltersAndRender(false);
+      }
+    }
+
+    renderSortBlocks();
 
     // F5 새로고침 자동 캐시 복원 (localStorage Persistence)
     window.addEventListener('DOMContentLoaded', () => {
@@ -1245,6 +1706,8 @@
           </div>
         `;
         document.getElementById('filteredCount').textContent = '0';
+        const pag = document.getElementById('paginationContainer');
+        if (pag) { pag.innerHTML = ''; pag.style.display = 'none'; }
         return;
       }
 
@@ -1263,12 +1726,7 @@
       const useTargetDate = document.getElementById('useTargetDate').checked;
       const rawTargetDate = document.getElementById('targetDate').value;
       const targetDate = useTargetDate ? rawTargetDate.replace(/-/g, '') : '';
-      const sortBy = document.getElementById('sortBy').value;
-      const sortOrder1 = document.getElementById('sortOrder1').value;
-      const sortBy2 = document.getElementById('sortBy2').value;
-      const sortOrder2 = document.getElementById('sortOrder2').value;
-      const sortBy3 = document.getElementById('sortBy3').value;
-      const sortOrder3 = document.getElementById('sortOrder3').value;
+      const useSorting = document.getElementById('useSorting') ? document.getElementById('useSorting').checked : true;
 
       let filtered = windowRawData.filter(item => {
         const isBm = bookmarks.includes(item.progrmRegistNo);
@@ -1335,38 +1793,21 @@
         return true;
       });
 
-      // ⚡ 3단계 다중 정렬 파이프라인 (1차 ➔ 2차 ➔ 3차 정렬)
-      filtered.sort((a, b) => {
-        // 1차 정렬
-        const valA1 = a[sortBy] || '';
-        const valB1 = b[sortBy] || '';
-        let cmp1 = valA1.localeCompare(valB1);
-        if (cmp1 !== 0) {
-          return sortOrder1 === 'asc' ? cmp1 : -cmp1;
-        }
-
-        // 2차 정렬 (1차 동률 시)
-        if (sortBy2 && sortBy2 !== sortBy) {
-          const valA2 = a[sortBy2] || '';
-          const valB2 = b[sortBy2] || '';
-          let cmp2 = valA2.localeCompare(valB2);
-          if (cmp2 !== 0) {
-            return sortOrder2 === 'asc' ? cmp2 : -cmp2;
+      // ⚡ N단계 동적 다중 정렬 파이프라인 (useSorting 스위치 ON일 때만 적용)
+      if (useSorting) {
+        filtered.sort((a, b) => {
+          for (const rule of sortRules) {
+            if (!rule.field) continue;
+            const valA = a[rule.field] || '';
+            const valB = b[rule.field] || '';
+            const cmp = valA.localeCompare(valB);
+            if (cmp !== 0) {
+              return rule.order === 'asc' ? cmp : -cmp;
+            }
           }
-        }
-
-        // 3차 정렬 (2차 동률 시)
-        if (sortBy3 && sortBy3 !== sortBy && sortBy3 !== sortBy2) {
-          const valA3 = a[sortBy3] || '';
-          const valB3 = b[sortBy3] || '';
-          let cmp3 = valA3.localeCompare(valB3);
-          if (cmp3 !== 0) {
-            return sortOrder3 === 'asc' ? cmp3 : -cmp3;
-          }
-        }
-
-        return 0;
-      });
+          return 0;
+        });
+      }
 
       // Missing bookmarks handling (원천 데이터에 없는 과거 북마크 항목 보존 및 표시)
       const rawIds = new Set(windowRawData.map(d => d.progrmRegistNo));
@@ -1457,6 +1898,20 @@
         }
       }
 
+      // Visual feedback & status badge for Sort toggle
+      const sortBadge = document.getElementById('sortStatusBadge');
+      const sortWrapper = document.getElementById('sortControlsWrapper');
+      if (sortWrapper) {
+        sortWrapper.style.opacity = useSorting ? '1' : '0.45';
+      }
+      if (sortBadge) {
+        if (!useSorting) {
+          sortBadge.textContent = '🔒 원천 순서';
+        } else {
+          sortBadge.textContent = '';
+        }
+      }
+
       // Active filter badges
       const badgesContainer = document.getElementById('activeFilterBadges');
       const badges = [];
@@ -1468,6 +1923,13 @@
       if (useKwds && includeKwds.length > 0) badges.push(`<span class="tag tag-purple">🔍 포함: ${includeKwds.join(', ')}</span>`);
       if (useKwds && excludeKwds.length > 0) badges.push(`<span class="tag tag-amber" style="color:#f43f5e; border-color:#f43f5e;">🚫 제외: ${excludeKwds.join(', ')}</span>`);
       if (useTargetDate && targetDate) badges.push(`<span class="tag tag-amber">📅 날짜: ${rawTargetDate}</span>`);
+      if (useSorting && sortRules.length > 0) {
+        const sortSummary = sortRules.map(r => {
+          const opt = SORT_FIELD_OPTIONS.find(o => o.value === r.field);
+          return (opt ? opt.label : r.field) + (r.order === 'asc' ? '⬆️' : '⬇️');
+        }).join(' ➔ ');
+        badges.push(`<span class="tag tag-blue">🔀 정렬: ${sortSummary}</span>`);
+      }
 
       badgesContainer.innerHTML = badges.join('');
       renderCardsList();
@@ -1476,7 +1938,13 @@
     // ⚡ 클라이언트 사이드 0초 인메모리 페이지네이션 컨트롤러
     function renderCardsList() {
       const container = document.getElementById('resultsContainer');
+      const pagContainer = document.getElementById('paginationContainer');
+
       if (currentFilteredItems.length === 0) {
+        if (pagContainer) {
+          pagContainer.innerHTML = '';
+          pagContainer.style.display = 'none';
+        }
         container.innerHTML = `
           <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: var(--text-muted);">
             필터 조건에 일치하는 봉사활동이 없습니다.
@@ -1576,8 +2044,7 @@
         `;
       }).join('');
 
-      // ⚡ 클라이언트 사이드 페이지 번호 바 [1] [2] [3] [4] [5] 생성
-      let paginationHtml = '';
+      // ⚡ 하단 고정 페이지네이션 바 [1] [2] [3] [4] [5] 렌더링
       if (totalPages > 1) {
         let pageBtns = '';
         const maxVisibleBtns = 5;
@@ -1590,31 +2057,41 @@
 
         for (let p = startPage; p <= endPage; p++) {
           const activeStyle = p === currentPage ? 'background: var(--accent-blue); color: white; border-color: var(--accent-blue); font-weight: 700;' : 'background: var(--bg-card); color: var(--text-main); border-color: var(--border-color);';
-          pageBtns += `<button class="btn-detail" style="padding: 0.4rem 0.8rem; min-width: 38px; ${activeStyle}" onclick="goToPage(${p})">${p}</button>`;
+          pageBtns += `<button class="btn-detail" style="padding: 0.35rem 0.75rem; min-width: 36px; ${activeStyle}" onclick="goToPage(${p})">${p}</button>`;
         }
 
         const prevDisabled = currentPage === 1 ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : '';
         const nextDisabled = currentPage === totalPages ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : '';
 
-        paginationHtml = `
-          <div style="grid-column: 1 / -1; display: flex; justify-content: center; align-items: center; gap: 0.4rem; margin-top: 2rem; margin-bottom: 2rem;">
-            <button class="btn-detail" ${prevDisabled} onclick="goToPage(${currentPage - 1})">◀ 이전</button>
-            ${pageBtns}
-            <button class="btn-detail" ${nextDisabled} onclick="goToPage(${currentPage + 1})">다음 ▶</button>
-            <span style="font-size: 0.8rem; color: var(--text-muted); margin-left: 0.8rem;">
-              (${currentPage} / ${totalPages} 페이지, 총 ${currentFilteredItems.length}건)
-            </span>
-          </div>
+        const paginationHtml = `
+          <button class="btn-detail" ${prevDisabled} onclick="goToPage(${currentPage - 1})">◀ 이전</button>
+          ${pageBtns}
+          <button class="btn-detail" ${nextDisabled} onclick="goToPage(${currentPage + 1})">다음 ▶</button>
+          <span style="font-size: 0.8rem; color: var(--text-muted); margin-left: 0.8rem;">
+            (${currentPage} / ${totalPages} 페이지, 총 ${currentFilteredItems.length}건)
+          </span>
         `;
+        if (pagContainer) {
+          pagContainer.innerHTML = paginationHtml;
+          pagContainer.style.display = 'flex';
+        }
+      } else {
+        if (pagContainer) {
+          pagContainer.innerHTML = '';
+          pagContainer.style.display = 'none';
+        }
       }
 
-      container.innerHTML = cardsHtml + paginationHtml;
+      container.innerHTML = cardsHtml;
     }
 
     function goToPage(page) {
       currentPage = page;
       renderCardsList();
-      window.scrollTo({ top: document.querySelector('.results-header').offsetTop - 20, behavior: 'smooth' });
+      const scrollArea = document.querySelector('.results-scroll-area');
+      if (scrollArea) {
+        scrollArea.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     }
 
     // Modal Details Fetcher
@@ -1681,7 +2158,7 @@
     }
 
     // 1. 체크박스 / 드롭다운 / 날짜 ➔ 클릭 즉시 0초 실시간반영
-    ['recruitingOnly', 'adultPosbl', 'youthPosbl', 'sidoSelect', 'useKwds', 'useTargetDate', 'targetDate', 'sortBy', 'sortOrder1', 'sortBy2', 'sortOrder2', 'sortBy3', 'sortOrder3'].forEach(id => {
+    ['recruitingOnly', 'adultPosbl', 'youthPosbl', 'sidoSelect', 'useKwds', 'useTargetDate', 'useSorting', 'targetDate'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.addEventListener('change', applyFiltersAndRender);
     });
