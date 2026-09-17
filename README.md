@@ -175,10 +175,12 @@ curl -X GET "http://apis.data.go.kr/1741000/volunteerPartcptnService/getVltrSear
 c:\dev_project\1365\
 ├── index.html               # 💻 반응형 웹 탐색기 대시보드 UI
 ├── area_mapper.js           # 🗺️ JS Area Mapper 엔진 (194개 지자체, 요일/D-Day 계산)
-├── area_mapper.py           # 🐍 파이썬 시도/시군구 자동 매칭 모듈
-├── volunteer_search.py      # 🐍 파이썬 2단계 파이프라인 수집/필터링 엔진
 ├── server.py                # 🔒 로컬 백엔드 프록시 서버 (PORT 3000)
-├── fetch_volunteer_data.ipynb # 📓 데이터 분석 탐색용 Jupyter Notebook
 ├── .env                     # 🔒 API 인증키 환경변수 파일 (SERVICE_KEY)
-└── README.md                # 📄 본 프로젝트 명세 가이드 문서
+├── README.md                # 📄 본 프로젝트 명세 가이드 문서
+└── legacy_python_scripts/   # 📦 레거시 파이썬 수집/분석 모듈 및 임시 파일 보관함
+    ├── area_mapper.py
+    ├── volunteer_search.py
+    ├── fetch_volunteer_data.py
+    └── fetch_volunteer_data.ipynb
 ```
