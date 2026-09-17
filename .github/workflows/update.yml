@@ -1,0 +1,31 @@
+name: 1365 봉사 데이터 자동 갱신 (data.json)
+
+on:
+  schedule:
+    # 매일 한국시간 06시(UTC 21시) 및 13시(UTC 04시) 자동 실행
+    - cron: '0 21,4 * * *'
+  workflow_dispatch: # GitHub 웹 UI에서 수동 실행 버튼 활성화
+
+jobs:
+  update-volunteer-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 저장소 체크아웃
+        uses: actions/checkout@v3
+
+      - name: 파이썬 환경 설정
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: 1365 API 수집 스크립트 실행 (data.json 갱신)
+        env:
+          SERVICE_KEY: ${{ secrets.SERVICE_KEY }}
+        run: python update_data.py
+
+      - name: 변경사항 Git 커밋 & 푸시
+        run: |
+          git config --global user.name "1365-Auto-Bot"
+          git config --global user.email "bot@github.com"
+          git add data.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "🤖 [자동 갱신] 최신 1365 봉사데이터 수집 완료 (data.json)" && git push)
