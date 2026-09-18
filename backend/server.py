@@ -1,3 +1,9 @@
+"""
+[NOTE] 백엔드 듀얼 모드 예비용 서버 코드 (Standby Backend Server)
+현재 v2.0.0 버전은 백엔드 없는 정적 모드(data.json)로 기본 작동 중입니다.
+추후 실시간 API 프록시나 백엔드 연동이 필요할 때 본 서버 코드를 활용/실행할 수 있습니다.
+"""
+
 import os, json
 import sys
 import urllib.request
