@@ -1,4 +1,4 @@
-{
+window.STATIC_1365_DATA = {
   "updatedAt": "2026-09-19 18:23:10",
   "totalCount": 10869,
   "items": [
@@ -206514,4 +206514,4 @@
       "yngbgsPosblAt": "N"
     }
   ]
-}
+};

@@ -4,13 +4,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>1365 자원봉사 2단계 파이프라인 Explorer & 대시보드</title>
+  <title>1365 자원봉사 스마트 탐색기</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
     href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap"
     rel="stylesheet">
   <script src="area_mapper.js"></script>
+  <script src="data.js"></script>
   <style>
     :root {
       --bg-primary: #0f172a;
@@ -1010,10 +1011,10 @@
         <div class="brand-logo">1365</div>
         <div>
           <div class="brand-title" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-            <span>1365 자원봉사 2단계 파이프라인 Explorer</span>
-            <span style="font-size: 0.72rem; background: var(--accent-blue); color: #ffffff; padding: 0.15rem 0.45rem; border-radius: 4px; font-weight: 700;">v2.0.0 Static-First</span>
+            <span>1365 자원봉사 스마트 탐색기</span>
+            <span style="font-size: 0.72rem; background: var(--accent-blue); color: #ffffff; padding: 0.15rem 0.45rem; border-radius: 4px; font-weight: 700;">v2.0.0 Static</span>
           </div>
-          <div class="brand-sub">Area Mapper 엔진 이식 & 0.01초 메모리 필터링 & ⭐ 관심/제외/정렬 1초 동기화</div>
+          <div class="brand-sub">Area Mapper 엔진 이식 & 브라우저 인메모리 반응형 필터링 & ⭐ 개인화 동기화 지원</div>
         </div>
       </div>
       <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
@@ -1022,7 +1023,7 @@
         </button>
         <div class="badge-status">
           <span class="badge-dot"></span>
-          Static-First Mode (0.01s)
+          Static Database Loaded
         </div>
       </div>
     </div>
@@ -1031,24 +1032,28 @@
   <main>
     <!-- Left Control Panel -->
     <section class="panel panel-sidebar">
-      <!-- 1단계: 원천 데이터 수집 -->
+      <!-- 원천 데이터 상태 -->
       <div class="panel-title">
-        <span>📥 [1단계] 원천 데이터</span>
-        <span class="step-badge">Full Ingestion</span>
+        <span>📥 원천 데이터 현황</span>
+        <span class="step-badge">Static Database</span>
       </div>
 
-      <p
-        style="font-size: 0.8rem; color: var(--text-muted); margin-top: -0.2rem; margin-bottom: 0.85rem; line-height: 1.45;">
-        대한민국 1365 포털의 등록 봉사 공고를 1만 건 이상 누락 없이 <strong>100% 전수 수집</strong>하여 메모리에 탑재합니다.
-      </p>
+      <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.85rem; margin-bottom: 1.25rem;">
+        <div style="font-size: 0.825rem; font-weight: 700; color: var(--accent-emerald); display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.35rem;">
+          <span>⚡ 정적 데이터베이스 로드됨</span>
+        </div>
+        <div style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0.6rem;">
+          수집 건수: <strong id="staticCountBadge" style="color: var(--accent-blue);">0</strong>건<br>
+          <span id="staticTimeBadge">📅 수집 시각: 확인 중...</span>
+        </div>
+        <button type="button" class="btn-submit" id="btnReload" onclick="reloadStaticData()" style="padding: 0.45rem 0.75rem; font-size: 0.78rem; margin: 0; width: 100%;">
+          🔄 데이터 다시 읽기 (새로고침)
+        </button>
+      </div>
 
-      <button class="btn-submit" id="btnFetch" style="margin-bottom: 1.5rem;">
-        <span id="btnText">🚀 1365 전국 전체 데이터 1회 수집</span>
-      </button>
-
-      <!-- 2단계: 순수 반응형 필터링 -->
+      <!-- 반응형 필터 -->
       <div class="panel-title">
-        <span>⚡ [2단계] 반응형 필터</span>
+        <span>⚡ 상세 조건 필터</span>
         <span class="step-badge"
           style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.3);">Data
           Filtering</span>
@@ -1177,7 +1182,7 @@
       <div class="results-scroll-area">
         <div id="resultsContainer" class="card-grid">
           <div style="grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; color: var(--text-muted);">
-            좌측의 <strong>[🚀 1365 원천 데이터 1회 수집]</strong> 버튼을 클릭하여 데이터를 불러오세요.
+            데이터를 읽어오는 중입니다...
           </div>
         </div>
       </div>
@@ -1259,13 +1264,13 @@
 
       <div style="background: rgba(30, 41, 59, 0.7); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
         <h4 style="font-size: 0.9rem; margin-bottom: 0.4rem; color: var(--accent-blue); display: flex; align-items: center; gap: 0.4rem;">
-          💬 카카오톡 / URL 동기화 링크
+          🔗 동기화 URL 링크 복사
         </h4>
         <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.75rem;">
-          아래 버튼을 클릭하면 내 설정 패키지(관심+제외+정렬)가 포함된 동기화 URL이 복사됩니다. 카톡으로 보낸 뒤 스마트폰에서 클릭하세요.
+          아래 버튼을 클릭하면 내 설정 패키지(관심+제외+정렬)가 동기화 URL 형태로 클립보드에 복사됩니다. 복사된 주소를 모바일로 전달 후 터치하세요.
         </p>
         <button type="button" class="btn-submit" onclick="copySyncUrl()" style="padding: 0.55rem 1rem; font-size: 0.825rem; width: 100%;">
-          🔗 모바일 동기화 링크 복사하기
+          🔗 동기화 전용 URL 링크 복사하기
         </button>
       </div>
 
@@ -1555,12 +1560,12 @@
       const syncUrl = generateSyncUrl();
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(syncUrl).then(() => {
-          alert('🎉 [모바일 동기화 URL 복사 완료!]\n\n카카오톡 "나에게 보내기"로 메시지를 전송한 후, 스마트폰에서 터치하면 내 관심/숨김/정렬 설정이 1초 만에 복사됩니다.');
+          alert('🔗 [동기화 URL 링크 복사 완료!]\n\n복사된 주소를 메시지/카카오톡으로 보낸 후 스마트폰에서 클릭하면 내 관심/숨김/정렬 설정이 정상 동기화됩니다.');
         }).catch(() => {
-          prompt('아래 URL을 복사하여 스마트폰으로 전송하세요:', syncUrl);
+          prompt('아래 동기화 URL을 복사하여 모바일로 전달하세요:', syncUrl);
         });
       } else {
-        prompt('아래 URL을 복사하여 스마트폰으로 전송하세요:', syncUrl);
+        prompt('아래 동기화 URL을 복사하여 모바일로 전달하세요:', syncUrl);
       }
     }
 
@@ -1665,76 +1670,163 @@
       }
     }
 
+    // Format updatedAt to YYYY-MM-DD HH:mm format
+    function formatUpdateTime(updatedAtStr) {
+      if (!updatedAtStr) return '확인 중';
+      // If "2026-09-18 01:33:32", format to "2026-09-18 01:33"
+      if (updatedAtStr.length >= 16) {
+        return updatedAtStr.slice(0, 16);
+      }
+      return updatedAtStr;
+    }
+
+    async function reloadStaticData() {
+      const btnReload = document.getElementById('btnReload');
+      if (btnReload) btnReload.textContent = '🔄 데이터 다시 읽는 중...';
+      try {
+        const resp = await fetch('./data.json?t=' + Date.now());
+        if (resp.ok) {
+          const data = await resp.json();
+          const items = data.items || (Array.isArray(data) ? data : []);
+          if (items.length > 0) {
+            windowRawData = items;
+            latestTotalCount = data.totalCount || items.length;
+            document.getElementById('totalCount').textContent = latestTotalCount.toLocaleString();
+            document.getElementById('staticCountBadge').textContent = latestTotalCount.toLocaleString();
+
+            const timeFormatted = formatUpdateTime(data.updatedAt);
+            document.getElementById('staticTimeBadge').textContent = `📅 수집 시각: ${timeFormatted}`;
+
+            const badgesContainer = document.getElementById('activeFilterBadges');
+            badgesContainer.innerHTML = `<span class="tag tag-emerald" style="font-weight: 700;">⚡ 정적 데이터 로드 완료 (수집: ${timeFormatted})</span>`;
+            applyFiltersAndRender();
+          }
+        }
+      } catch (e) {
+        console.warn("Reload error:", e);
+      }
+      if (btnReload) btnReload.textContent = '🔄 데이터 다시 읽기 (새로고침)';
+    }
+
     // ==========================================
-    // ⚡ Static-First 0.01초 자동 로딩 & F5 복원
+    // ⚡ Static-First 데이터 로딩 엔진 (window.STATIC_1365_DATA -> fetch fallback)
     // ==========================================
+    function loadStaticDataFromObj(data) {
+      if (!data) return false;
+      const items = data.items || (Array.isArray(data) ? data : []);
+      if (items.length === 0) return false;
+
+      // Inject Area Mapper locationName calculation
+      items.forEach(itemObj => {
+        if (!itemObj.locationName) {
+          const addressText = `${itemObj.areaAddress1 || ''} ${itemObj.postAdres || ''} ${itemObj.actPlace || ''} ${itemObj.nanmmbyNm || ''}`;
+          itemObj.locationName = AREA_MAPPER.getLocationName(
+            itemObj.sidoCd,
+            itemObj.gugunCd,
+            addressText
+          );
+        }
+      });
+
+      windowRawData = items;
+      latestTotalCount = data.totalCount || items.length;
+      const tElem = document.getElementById('totalCount');
+      if (tElem) tElem.textContent = latestTotalCount.toLocaleString();
+
+      const badgeElem = document.getElementById('staticCountBadge');
+      if (badgeElem) badgeElem.textContent = latestTotalCount.toLocaleString();
+
+      const timeFormatted = formatUpdateTime(data.updatedAt);
+      const timeElem = document.getElementById('staticTimeBadge');
+      if (timeElem) timeElem.textContent = `📅 수집 시각: ${timeFormatted}`;
+
+      windowRawData.forEach(item => {
+        if (bookmarks.includes(item.progrmRegistNo)) {
+          bookmarkDetails[item.progrmRegistNo] = item;
+        }
+      });
+      try {
+        localStorage.setItem('1365_bookmark_details', JSON.stringify(bookmarkDetails));
+      } catch (e) { }
+
+      const badgesContainer = document.getElementById('activeFilterBadges');
+      if (badgesContainer) {
+        badgesContainer.innerHTML = `<span class="tag tag-emerald" style="font-weight: 700;">⚡ 정적 데이터 로드 완료 (수집: ${timeFormatted})</span>`;
+      }
+      
+      applyFiltersAndRender();
+      return true;
+    }
+
+    async function reloadStaticData() {
+      const btnReload = document.getElementById('btnReload');
+      if (btnReload) btnReload.textContent = '🔄 데이터 다시 읽는 중...';
+      
+      let success = false;
+      try {
+        const resp = await fetch('./data.json?t=' + Date.now());
+        if (resp.ok) {
+          const data = await resp.json();
+          success = loadStaticDataFromObj(data);
+        }
+      } catch (e) {
+        console.warn("Reload fetch error:", e);
+      }
+
+      if (!success && window.STATIC_1365_DATA) {
+        success = loadStaticDataFromObj(window.STATIC_1365_DATA);
+      }
+
+      if (btnReload) btnReload.textContent = '🔄 데이터 다시 읽기 (새로고침)';
+    }
+
+    function initDataLoad() {
+      if (windowRawData.length > 0) return true;
+      if (typeof window.STATIC_1365_DATA !== 'undefined' && window.STATIC_1365_DATA) {
+        if (loadStaticDataFromObj(window.STATIC_1365_DATA)) return true;
+      }
+      return false;
+    }
+
+    // Stage 1: Immediate load attempt
+    initDataLoad();
+
+    // Stage 2: DOMContentLoaded load attempt
     window.addEventListener('DOMContentLoaded', async () => {
       checkUrlSync();
 
-      // 1. Static-First mode loading from ./data.json
+      if (initDataLoad()) return;
+
+      // Fetch ./data.json fallback
       if (!CONFIG.USE_BACKEND_SERVER) {
         try {
           const resp = await fetch('./data.json');
           if (resp.ok) {
             const data = await resp.json();
-            const items = data.items || (Array.isArray(data) ? data : []);
-            if (items.length > 0) {
-              windowRawData = items;
-              latestTotalCount = data.totalCount || items.length;
-              const tElem = document.getElementById('totalCount');
-              if (tElem) tElem.textContent = latestTotalCount.toLocaleString();
-
-              // Cache details for currently known bookmarks
-              windowRawData.forEach(item => {
-                if (bookmarks.includes(item.progrmRegistNo)) {
-                  bookmarkDetails[item.progrmRegistNo] = item;
-                }
-              });
-              try {
-                localStorage.setItem('1365_bookmark_details', JSON.stringify(bookmarkDetails));
-              } catch (e) { }
-
-              const badgesContainer = document.getElementById('activeFilterBadges');
-              const updateStr = data.updatedAt ? ` (수집: ${data.updatedAt})` : '';
-              badgesContainer.innerHTML = `<span class="tag tag-emerald" style="font-weight: 700;">⚡ 정적 데이터 0.01초 로드 완료${updateStr}</span>`;
-              
-              applyFiltersAndRender();
-              return;
-            }
+            if (loadStaticDataFromObj(data)) return;
           }
         } catch (e) {
           console.warn("Static data.json fetch error, falling back to local cache:", e);
         }
       }
 
-      // 2. Local raw cache fallback
+      // Local raw cache fallback
       const cached = localStorage.getItem('1365_raw_cache');
       if (cached) {
         try {
           const parsed = JSON.parse(cached);
           if (parsed && parsed.items && parsed.items.length > 0) {
-            windowRawData = parsed.items;
-            latestTotalCount = parsed.totalCount || parsed.items.length;
-            const tElem = document.getElementById('totalCount');
-            if (tElem) tElem.textContent = latestTotalCount.toLocaleString();
-
-            windowRawData.forEach(item => {
-              if (bookmarks.includes(item.progrmRegistNo)) {
-                bookmarkDetails[item.progrmRegistNo] = item;
-              }
-            });
-            try {
-              localStorage.setItem('1365_bookmark_details', JSON.stringify(bookmarkDetails));
-            } catch (e) { }
-
-            const badgesContainer = document.getElementById('activeFilterBadges');
-            badgesContainer.innerHTML = `<span class="tag tag-emerald">💾 로컬 캐시 0초 복원됨 (${parsed.items.length}건)</span>`;
-            applyFiltersAndRender();
+            loadStaticDataFromObj(parsed);
           }
         } catch (e) {
           console.error("Cache load error:", e);
         }
       }
+    });
+
+    // Stage 3: Full window load fallback
+    window.addEventListener('load', () => {
+      initDataLoad();
     });
 
     function toggleBookmark(regNo, e) {
@@ -1843,9 +1935,9 @@
     }
 
     // ==========================================
-    // 📥 1단계: 전국 원천 데이터 자동 전수 수집 (Full Data Ingestion)
-    // ==========================================
-    document.getElementById('btnFetch').addEventListener('click', async () => {
+    const btnFetchEl = document.getElementById('btnFetch');
+    if (btnFetchEl) {
+      btnFetchEl.addEventListener('click', async () => {
       if (window.location.protocol === 'file:') {
         alert('보안 강화를 위해 http://localhost:3000 프록시 서버로 접속하세요. (.env 키 보호)');
         return;
@@ -1947,9 +2039,10 @@
         `;
       }
     });
+    }
 
     // ==========================================
-    // ⚡ 2단계: 순수 반응형 0.001초 필터링 (Data Filtering)
+    // 실시간 필터링 (Data Filtering)
     // ==========================================
     function applyFiltersAndRender(resetPage = true) {
       displayLimit = 20; // Reset pagination limit on filter change
@@ -1966,20 +2059,20 @@
         return;
       }
 
-      const recruitingOnly = document.getElementById('recruitingOnly').checked;
-      const adultPosbl = document.getElementById('adultPosbl').checked;
-      const youthPosbl = document.getElementById('youthPosbl').checked;
-      const sidoCd = document.getElementById('sidoSelect').value;
-      const locText = document.getElementById('locText').value.trim();
+      const recruitingOnly = document.getElementById('recruitingOnly')?.checked || false;
+      const adultPosbl = document.getElementById('adultPosbl')?.checked || false;
+      const youthPosbl = document.getElementById('youthPosbl')?.checked || false;
+      const sidoCd = document.getElementById('sidoSelect')?.value || '';
+      const locText = document.getElementById('locText')?.value?.trim() || '';
 
-      const useKwds = document.getElementById('useKwds').checked;
-      const rawIncludeKwds = document.getElementById('includeKwds').value.trim();
-      const rawExcludeKwds = document.getElementById('excludeKwds').value.trim();
+      const useKwds = document.getElementById('useKwds')?.checked || false;
+      const rawIncludeKwds = document.getElementById('includeKwds')?.value?.trim() || '';
+      const rawExcludeKwds = document.getElementById('excludeKwds')?.value?.trim() || '';
       const includeKwds = useKwds ? rawIncludeKwds.split(',').map(s => s.trim()).filter(Boolean) : [];
       const excludeKwds = useKwds ? rawExcludeKwds.split(',').map(s => s.trim()).filter(Boolean) : [];
 
-      const useTargetDate = document.getElementById('useTargetDate').checked;
-      const rawTargetDate = document.getElementById('targetDate').value;
+      const useTargetDate = document.getElementById('useTargetDate')?.checked || false;
+      const rawTargetDate = document.getElementById('targetDate')?.value || '';
       const targetDate = useTargetDate ? rawTargetDate.replace(/-/g, '') : '';
       const useSorting = document.getElementById('useSorting') ? document.getElementById('useSorting').checked : true;
 
@@ -2048,13 +2141,13 @@
         return true;
       });
 
-      // ⚡ N단계 동적 다중 정렬 파이프라인 (useSorting 스위치 ON일 때만 적용)
+      // 동적 다중 정렬 적용 (useSorting 스위치 ON일 때만 적용)
       if (useSorting) {
         filtered.sort((a, b) => {
           for (const rule of sortRules) {
             if (!rule.field) continue;
-            const valA = a[rule.field] || '';
-            const valB = b[rule.field] || '';
+            const valA = a[rule.field] != null ? String(a[rule.field]) : '';
+            const valB = b[rule.field] != null ? String(b[rule.field]) : '';
             const cmp = valA.localeCompare(valB);
             if (cmp !== 0) {
               return rule.order === 'asc' ? cmp : -cmp;
@@ -2349,54 +2442,47 @@
       }
     }
 
-    // Modal Details Fetcher
+    // Modal Details Fetcher (0s instant rendering using pre-loaded data)
     async function openDetail(regNo) {
       const modal = document.getElementById('detailModal');
       modal.classList.add('active');
-      document.getElementById('mTitle').textContent = '상세 정보 불러오는 중...';
-      document.getElementById('mDesc').textContent = '잠시만 기다려주세요...';
 
-      let reqUrl = `/api/volunteer?op=getVltrPartcptnItem&progrmRegistNo=${regNo}`;
-      if (window.location.protocol === 'file:') {
-        alert('보안 강화를 위해 http://localhost:3000 프록시 서버로 접속하세요. (.env 키 보호)');
+      const d = windowRawData.find(it => String(it.progrmRegistNo) === String(regNo)) || bookmarkDetails[regNo];
+      if (d) {
+        document.getElementById('mTitle').textContent = d.progrmSj || '자원봉사 상세';
+        document.getElementById('mRegNo').textContent = d.progrmRegistNo || '-';
+
+        const mnnst = (d.mnnstNm && d.mnnstNm.trim()) ? d.mnnstNm.trim() : '';
+        const nanm = (d.nanmmbyNm && d.nanmmbyNm.trim()) ? d.nanmmbyNm.trim() : '';
+
+        document.getElementById('mMnnstNm').textContent = mnnst || cleanAgencyName(nanm);
+        document.getElementById('mLocName').textContent = d.locationName || '-';
+
+        const dDayInfo = calculateDDay(d.noticeEndde);
+        const dDayStr = dDayInfo ? ` [${dDayInfo.label}]` : '';
+
+        document.getElementById('mNoticePeriod').textContent = ((d.noticeBgnde && d.noticeEndde) ? `${formatDate(d.noticeBgnde)} ~ ${formatDate(d.noticeEndde)}` : '-') + dDayStr;
+        document.getElementById('mPeriod').textContent = (d.progrmBgnde && d.progrmEndde) ? `${formatDate(d.progrmBgnde)} ~ ${formatDate(d.progrmEndde)}` : '-';
+        document.getElementById('mTime').textContent = (d.actBeginTm || d.actEndTm) ? `${d.actBeginTm || ''}시 ~ ${d.actEndTm || ''}시` : '-';
+        document.getElementById('mPlace').textContent = d.actPlace || d.postAdres || '-';
+        document.getElementById('mQuota').textContent = `${d.rcritNmpr || '0'}명 / ${d.appTotal || '0'}명`;
+        document.getElementById('mContact').textContent = `${d.nanmmbyNmAdmn || '-'} (${d.telno || '연락처 없음'})`;
+        document.getElementById('mDesc').textContent = d.progrmCn || '상세 모집 요강 및 신청은 1365 공식 포털 웹페이지에서 가능합니다.';
+
+        const portalUrl = d.url || `https://www.1365.go.kr/vols/P9210/partcptn/timeCptn.do?type=show&progrmRegistNo=${regNo}`;
+        const urlLink = document.getElementById('mUrl');
+        urlLink.href = portalUrl;
+        urlLink.style.display = 'inline-flex';
         return;
       }
 
-      try {
-        const resp = await fetch(reqUrl);
-        const text = await resp.text();
-        const { items } = parseXml(text);
-
-        if (items.length > 0) {
-          const d = items[0];
-          document.getElementById('mTitle').textContent = d.progrmSj || '자원봉사 상세';
-          document.getElementById('mRegNo').textContent = d.progrmRegistNo || '-';
-
-          const mnnst = (d.mnnstNm && d.mnnstNm.trim()) ? d.mnnstNm.trim() : '';
-          const nanm = (d.nanmmbyNm && d.nanmmbyNm.trim()) ? d.nanmmbyNm.trim() : '';
-
-          document.getElementById('mMnnstNm').textContent = mnnst || cleanAgencyName(nanm);
-          document.getElementById('mLocName').textContent = d.locationName || '-';
-
-          const dDayInfo = calculateDDay(d.noticeEndde);
-          const dDayStr = dDayInfo ? ` [${dDayInfo.label}]` : '';
-
-          document.getElementById('mNoticePeriod').textContent = ((d.noticeBgnde && d.noticeEndde) ? `${formatDate(d.noticeBgnde)} ~ ${formatDate(d.noticeEndde)}` : '-') + dDayStr;
-          document.getElementById('mPeriod').textContent = (d.progrmBgnde && d.progrmEndde) ? `${formatDate(d.progrmBgnde)} ~ ${formatDate(d.progrmEndde)}` : '-';
-          document.getElementById('mTime').textContent = `${d.actBeginTm || ''}시 ~ ${d.actEndTm || ''}시`;
-          document.getElementById('mPlace').textContent = d.actPlace || d.postAdres || '-';
-          document.getElementById('mQuota').textContent = `${d.rcritNmpr || '0'}명 / ${d.appTotal || '0'}명`;
-          document.getElementById('mContact').textContent = `${d.nanmmbyNmAdmn || '-'} (${d.telno || '연락처 없음'})`;
-          document.getElementById('mDesc').textContent = d.progrmCn || '상세 내용이 없습니다.';
-
-          const portalUrl = d.url || `https://www.1365.go.kr/vols/P9210/partcptn/timeCptn.do?type=show&progrmRegistNo=${regNo}`;
-          const urlLink = document.getElementById('mUrl');
-          urlLink.href = portalUrl;
-          urlLink.style.display = 'inline-flex';
-        }
-      } catch (err) {
-        document.getElementById('mDesc').textContent = '상세 정보를 가져오는 도중 오류가 발생했습니다.';
-      }
+      // Fallback if not found in loaded memory
+      document.getElementById('mTitle').textContent = '상세 정보';
+      document.getElementById('mDesc').textContent = '1365 공식 포털에서 실시간 상세 정보를 확인하세요.';
+      const portalUrl = `https://www.1365.go.kr/vols/P9210/partcptn/timeCptn.do?type=show&progrmRegistNo=${regNo}`;
+      const urlLink = document.getElementById('mUrl');
+      urlLink.href = portalUrl;
+      urlLink.style.display = 'inline-flex';
     }
 
     document.getElementById('modalClose').addEventListener('click', () => {
@@ -2422,14 +2508,16 @@
     const targetDateEl = document.getElementById('targetDate');
     if (targetDateEl) {
       targetDateEl.addEventListener('input', () => {
-        if (targetDateEl.value && !document.getElementById('useTargetDate').checked) {
-          document.getElementById('useTargetDate').checked = true;
+        const useTargetDateEl = document.getElementById('useTargetDate');
+        if (targetDateEl.value && useTargetDateEl && !useTargetDateEl.checked) {
+          useTargetDateEl.checked = true;
         }
         applyFiltersAndRender();
       });
       targetDateEl.addEventListener('change', () => {
-        if (targetDateEl.value && !document.getElementById('useTargetDate').checked) {
-          document.getElementById('useTargetDate').checked = true;
+        const useTargetDateEl = document.getElementById('useTargetDate');
+        if (targetDateEl.value && useTargetDateEl && !useTargetDateEl.checked) {
+          useTargetDateEl.checked = true;
         }
         applyFiltersAndRender();
       });
@@ -2440,8 +2528,9 @@
       const el = document.getElementById(id);
       if (el) {
         el.addEventListener('input', () => {
-          if ((id === 'includeKwds' || id === 'excludeKwds') && el.value.trim() && !document.getElementById('useKwds').checked) {
-            document.getElementById('useKwds').checked = true;
+          const useKwdsEl = document.getElementById('useKwds');
+          if ((id === 'includeKwds' || id === 'excludeKwds') && el.value.trim() && useKwdsEl && !useKwdsEl.checked) {
+            useKwdsEl.checked = true;
           }
           debouncedFilter();
         });

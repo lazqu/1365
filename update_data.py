@@ -116,7 +116,13 @@ def run_update():
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(output_data, f, ensure_ascii=False, indent=2)
 
-    print(f"[SUCCESS] Total {len(final_items)} items collected -> {out_path} ({now_str})")
+    js_path = os.path.join(os.path.dirname(__file__), "data.js")
+    with open(js_path, "w", encoding="utf-8") as f:
+        f.write("window.STATIC_1365_DATA = ")
+        json.dump(output_data, f, ensure_ascii=False, indent=2)
+        f.write(";\n")
+
+    print(f"[SUCCESS] Total {len(final_items)} items collected -> {out_path} and {js_path} ({now_str})")
 
 if __name__ == "__main__":
     run_update()

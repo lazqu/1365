@@ -150,8 +150,9 @@ const AREA_MAPPER = {
  * 지자체 날것의 지명 텍스트(예: '경기도 안산시')를 자원봉사센터 기관명으로 자동 정제
  */
 function cleanAgencyName(name) {
-  if (!name || !name.trim()) return '-';
-  const clean = name.trim();
+  if (!name) return '-';
+  const clean = String(name).trim();
+  if (!clean) return '-';
   if (/^[가-힣]+(특별시|광역시|특별자치도|도)?\s*[가-힣]+(시|군|구)$/.test(clean)) {
     const match = clean.match(/([가-힣]{2,5}(시|군|구))$/);
     const city = match ? match[1] : clean;
@@ -164,26 +165,30 @@ function cleanAgencyName(name) {
  * 8자리 날짜 문자열(20260901)을 요일 포함 포맷팅(2026.09.01(화))으로 정규화
  */
 function formatDate(dStr) {
-  if (!dStr || dStr.length !== 8) return dStr || '-';
-  const y = parseInt(dStr.substring(0, 4), 10);
-  const m = parseInt(dStr.substring(4, 6), 10) - 1;
-  const d = parseInt(dStr.substring(6, 8), 10);
+  if (!dStr) return '-';
+  const str = String(dStr).trim();
+  if (str.length !== 8) return str || '-';
+  const y = parseInt(str.substring(0, 4), 10);
+  const m = parseInt(str.substring(4, 6), 10) - 1;
+  const d = parseInt(str.substring(6, 8), 10);
   
   const dateObj = new Date(y, m, d);
   const days = ['일', '월', '화', '수', '목', '금', '토'];
   const dayName = isNaN(dateObj.getTime()) ? '' : `(${days[dateObj.getDay()]})`;
   
-  return `${dStr.substring(0, 4)}.${dStr.substring(4, 6)}.${dStr.substring(6, 8)}${dayName}`;
+  return `${str.substring(0, 4)}.${str.substring(4, 6)}.${str.substring(6, 8)}${dayName}`;
 }
 
 /**
  * 모집 마감일(noticeEndde) 기준 D-DAY 계산 및 배지 스타일 제공
  */
 function calculateDDay(noticeEndde) {
-  if (!noticeEndde || noticeEndde.length !== 8) return null;
-  const y = parseInt(noticeEndde.substring(0, 4), 10);
-  const m = parseInt(noticeEndde.substring(4, 6), 10) - 1;
-  const d = parseInt(noticeEndde.substring(6, 8), 10);
+  if (!noticeEndde) return null;
+  const str = String(noticeEndde).trim();
+  if (str.length !== 8) return null;
+  const y = parseInt(str.substring(0, 4), 10);
+  const m = parseInt(str.substring(4, 6), 10) - 1;
+  const d = parseInt(str.substring(6, 8), 10);
   
   const endDate = new Date(y, m, d);
   const today = new Date();

@@ -27,5 +27,5 @@ jobs:
         run: |
           git config --global user.name "1365-Auto-Bot"
           git config --global user.email "bot@github.com"
-          git add data.json
-          git diff --quiet && git diff --staged --quiet || (git commit -m "🤖 [자동 갱신] 최신 1365 봉사데이터 수집 완료 (data.json)" && git push)
+          git add data.json data.js
+          git diff --quiet && git diff --staged --quiet || (git commit -m "🤖 [자동 갱신] 최신 1365 봉사데이터 수집 완료 (data.json & data.js)" && git push)
