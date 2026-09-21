@@ -592,6 +592,27 @@
       cursor: not-allowed;
     }
 
+    .btn-reset-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.2rem 0.55rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      border-radius: 6px;
+      background: rgba(148, 163, 184, 0.1);
+      color: var(--text-muted);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-reset-chip:hover {
+      background: rgba(244, 63, 94, 0.15);
+      color: #fb7185;
+      border-color: rgba(244, 63, 94, 0.4);
+    }
+
     .results-header {
       flex-shrink: 0;
       padding: 1.25rem 1.5rem 1rem 1.5rem;
@@ -1012,7 +1033,9 @@
         <div>
           <div class="brand-title" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
             <span>1365 자원봉사 탐색기 (개선판)</span>
-            <span style="font-size: 0.72rem; background: var(--accent-blue); color: #ffffff; padding: 0.15rem 0.45rem; border-radius: 4px; font-weight: 700;">v2.0.0 Static</span>
+            <span
+              style="font-size: 0.72rem; background: var(--accent-blue); color: #ffffff; padding: 0.15rem 0.45rem; border-radius: 4px; font-weight: 700;">v2.0.0
+              Static</span>
           </div>
           <div class="brand-sub">Area Mapper 엔진 이식 & 브라우저 인메모리 반응형 필터링 & ⭐ 개인화 동기화 지원</div>
         </div>
@@ -1038,25 +1061,32 @@
         <span class="step-badge">Static Database</span>
       </div>
 
-      <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.85rem; margin-bottom: 1.25rem;">
-        <div style="font-size: 0.825rem; font-weight: 700; color: var(--accent-emerald); display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.35rem;">
+      <div
+        style="background: rgba(30, 41, 59, 0.6); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.85rem; margin-bottom: 1.25rem;">
+        <div
+          style="font-size: 0.825rem; font-weight: 700; color: var(--accent-emerald); display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.35rem;">
           <span>⚡ 정적 데이터베이스 로드됨</span>
         </div>
         <div style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0.6rem;">
           수집 건수: <strong id="staticCountBadge" style="color: var(--accent-blue);">0</strong>건<br>
           <span id="staticTimeBadge">📅 수집 시각: 확인 중...</span>
         </div>
-        <button type="button" class="btn-submit" id="btnReload" onclick="reloadStaticData()" style="padding: 0.45rem 0.75rem; font-size: 0.78rem; margin: 0; width: 100%;">
+        <button type="button" class="btn-submit" id="btnReload" onclick="reloadStaticData()"
+          style="padding: 0.45rem 0.75rem; font-size: 0.78rem; margin: 0; width: 100%;">
           🔄 데이터 다시 읽기 (새로고침)
         </button>
       </div>
 
       <!-- 반응형 필터 -->
-      <div class="panel-title">
-        <span>⚡ 상세 조건 필터</span>
-        <span class="step-badge"
-          style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.3);">Data
-          Filtering</span>
+      <div class="panel-title" style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span>⚡ 상세 조건</span>
+          <span class="step-badge"
+            style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.3);">Filtering</span>
+        </div>
+        <button type="button" class="btn-reset-chip" onclick="resetFilterConditions()" title="모든 검색 필터 조건 초기화">
+          🔄 필터 초기화
+        </button>
       </div>
 
       <div class="form-group">
@@ -1147,7 +1177,10 @@
           </label>
         </div>
         <div id="sortControlsWrapper" style="transition: opacity 0.25s;">
-          <div style="display: flex; justify-content: flex-end; margin-bottom: 0.3rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem;">
+            <button type="button" class="btn-reset-chip" onclick="resetSortRules()" title="기존 1차 마감일 순으로 정렬 초기화">
+              🔄 정렬 초기화
+            </button>
             <span style="font-size: 0.72rem; color: var(--text-muted);">⠿ 드래그 / ▲▼ 이동</span>
           </div>
           <div id="sortBlocksList" class="sort-blocks-list"></div>
@@ -1162,7 +1195,8 @@
     <section class="panel panel-results">
       <div class="results-header" style="position: relative;">
         <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-          <h2 class="panel-title" id="resultsPanelTitle" style="margin-bottom: 0; border: none; padding: 0;">📊 자원봉사 목록</h2>
+          <h2 class="panel-title" id="resultsPanelTitle" style="margin-bottom: 0; border: none; padding: 0;">📊 자원봉사 목록
+          </h2>
           <div id="resultsCountInfo" style="font-size: 0.825rem; color: var(--text-muted);">
             원천 수집: <strong id="totalCount" style="color: var(--accent-blue);">0</strong>건 | ⚡ 필터링 적용: <strong
               id="filteredCount" style="color: var(--accent-emerald); font-size: 0.95rem;">0</strong>건
@@ -1170,18 +1204,24 @@
 
           <!-- 1줄 고정 팝오버 트리거 버튼 -->
           <div id="filterPopoverWrapper" style="position: relative; display: inline-block;">
-            <button id="btnToggleFilterPopover" type="button" class="btn-filter-popover" style="display: none; align-items: center; gap: 0.35rem; padding: 0.2rem 0.55rem; font-size: 0.75rem; font-weight: 600; border-radius: 6px; background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.35); cursor: pointer; transition: all 0.2s;" onclick="toggleFilterPopover(event)">
+            <button id="btnToggleFilterPopover" type="button" class="btn-filter-popover"
+              style="display: none; align-items: center; gap: 0.35rem; padding: 0.2rem 0.55rem; font-size: 0.75rem; font-weight: 600; border-radius: 6px; background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.35); cursor: pointer; transition: all 0.2s;"
+              onclick="toggleFilterPopover(event)">
               <span>🏷️ 적용 필터 <strong id="activeFilterCount">0</strong>개</span>
               <span id="popoverArrow">▾</span>
             </button>
 
             <!-- 둥둥 뜨는 팝오버 박스 (Floating Overlay) -->
-            <div id="filterPopoverMenu" class="filter-popover-menu" style="display: none; position: absolute; top: calc(100% + 8px); left: 0; z-index: 99; min-width: 260px; max-width: 360px; background: #0f172a; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px; padding: 0.75rem; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.5); backdrop-filter: blur(8px);">
-              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; padding-bottom: 0.4rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+            <div id="filterPopoverMenu" class="filter-popover-menu"
+              style="display: none; position: absolute; top: calc(100% + 8px); left: 0; z-index: 99; min-width: 260px; max-width: 360px; background: #0f172a; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px; padding: 0.75rem; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.5); backdrop-filter: blur(8px);">
+              <div
+                style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; padding-bottom: 0.4rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
                 <span style="font-size: 0.78rem; font-weight: 700; color: #f8fafc;">🏷️ 현재 적용된 필터 조건</span>
-                <span style="font-size: 0.75rem; color: var(--text-muted); cursor: pointer; padding: 0.1rem 0.3rem;" onclick="closeFilterPopover()">&times; 닫기</span>
+                <span style="font-size: 0.75rem; color: var(--text-muted); cursor: pointer; padding: 0.1rem 0.3rem;"
+                  onclick="closeFilterPopover()">&times; 닫기</span>
               </div>
-              <div id="activeFilterBadges" style="display: flex; flex-wrap: wrap; gap: 0.35rem; max-height: 200px; overflow-y: auto;"></div>
+              <div id="activeFilterBadges"
+                style="display: flex; flex-wrap: wrap; gap: 0.35rem; max-height: 200px; overflow-y: auto;"></div>
             </div>
           </div>
         </div>
@@ -1277,41 +1317,50 @@
         서버/회원가입 없이 <strong>[관심 목록 + 숨김/제외 목록 + 정렬 설정]</strong>을 모바일이나 다른 브라우저로 1초 만에 동기화할 수 있습니다.
       </p>
 
-      <div style="background: rgba(30, 41, 59, 0.7); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
-        <h4 style="font-size: 0.9rem; margin-bottom: 0.4rem; color: var(--accent-blue); display: flex; align-items: center; gap: 0.4rem;">
+      <div
+        style="background: rgba(30, 41, 59, 0.7); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+        <h4
+          style="font-size: 0.9rem; margin-bottom: 0.4rem; color: var(--accent-blue); display: flex; align-items: center; gap: 0.4rem;">
           🔗 동기화 URL 링크 복사
         </h4>
         <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.75rem;">
           아래 버튼을 클릭하면 내 설정 패키지(관심+제외+정렬)가 동기화 URL 형태로 클립보드에 복사됩니다. 복사된 주소를 모바일로 전달 후 터치하세요.
         </p>
-        <button type="button" class="btn-submit" onclick="copySyncUrl()" style="padding: 0.55rem 1rem; font-size: 0.825rem; width: 100%;">
+        <button type="button" class="btn-submit" onclick="copySyncUrl()"
+          style="padding: 0.55rem 1rem; font-size: 0.825rem; width: 100%;">
           🔗 동기화 전용 URL 링크 복사하기
         </button>
       </div>
 
-      <div style="background: rgba(30, 41, 59, 0.7); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; text-align: center;">
+      <div
+        style="background: rgba(30, 41, 59, 0.7); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; text-align: center;">
         <h4 style="font-size: 0.9rem; margin-bottom: 0.4rem; color: var(--accent-emerald); text-align: left;">
           📷 QR 코드 스캔 동기화
         </h4>
         <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.75rem; text-align: left;">
           스마트폰 기본 카메라로 아래 QR 코드를 스캔하면 내 모든 설정이 스마트폰으로 즉시 복사됩니다.
         </p>
-        <div style="display: flex; justify-content: center; padding: 0.75rem; background: #ffffff; border-radius: 8px; width: fit-content; margin: 0 auto;">
+        <div
+          style="display: flex; justify-content: center; padding: 0.75rem; background: #ffffff; border-radius: 8px; width: fit-content; margin: 0 auto;">
           <canvas id="qrCanvas" width="160" height="160"></canvas>
         </div>
       </div>
 
-      <div style="background: rgba(30, 41, 59, 0.7); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem;">
+      <div
+        style="background: rgba(30, 41, 59, 0.7); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem;">
         <h4 style="font-size: 0.9rem; margin-bottom: 0.4rem; color: var(--accent-purple);">
           💾 파일 백업 / 복원
         </h4>
         <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
-          <button type="button" class="btn-detail" onclick="exportSettingsFile()" style="flex: 1; padding: 0.6rem; font-size: 0.8rem; justify-content: center;">
+          <button type="button" class="btn-detail" onclick="exportSettingsFile()"
+            style="flex: 1; padding: 0.6rem; font-size: 0.8rem; justify-content: center;">
             📥 내 설정 백업 (.json)
           </button>
-          <label class="btn-detail" style="flex: 1; padding: 0.6rem; font-size: 0.8rem; justify-content: center; cursor: pointer;">
+          <label class="btn-detail"
+            style="flex: 1; padding: 0.6rem; font-size: 0.8rem; justify-content: center; cursor: pointer;">
             📤 백업 파일 불러오기
-            <input type="file" id="fileRestore" accept=".json" style="display: none;" onchange="importSettingsFile(event)">
+            <input type="file" id="fileRestore" accept=".json" style="display: none;"
+              onchange="importSettingsFile(event)">
           </label>
         </div>
       </div>
@@ -1339,6 +1388,169 @@
       document.getElementById('hiddenCount').textContent = hiddenItems.length;
     }
     updateHiddenCount();
+
+    // 💾 필터 조건 자동 저장 및 복원 (Smart Persistence)
+    function saveFilterState() {
+      try {
+        const state = {
+          recruitingOnly: document.getElementById('recruitingOnly')?.checked || false,
+          adultPosbl: document.getElementById('adultPosbl')?.checked || false,
+          youthPosbl: document.getElementById('youthPosbl')?.checked || false,
+          sidoSelect: document.getElementById('sidoSelect')?.value || '',
+          locText: document.getElementById('locText')?.value || '',
+          useKwds: document.getElementById('useKwds')?.checked || false,
+          includeKwds: document.getElementById('includeKwds')?.value || '',
+          excludeKwds: document.getElementById('excludeKwds')?.value || '',
+          useTargetDate: document.getElementById('useTargetDate')?.checked || false,
+          targetDate: document.getElementById('targetDate')?.value || '',
+          currentTab: currentTab || 'all'
+        };
+        localStorage.setItem('1365_filter_state', JSON.stringify(state));
+      } catch (e) {
+        console.error('필터 상태 저장 실패:', e);
+      }
+    }
+
+    function loadFilterState() {
+      try {
+        const saved = localStorage.getItem('1365_filter_state');
+        if (!saved) return;
+        const state = JSON.parse(saved);
+
+        if (state.recruitingOnly !== undefined && document.getElementById('recruitingOnly')) {
+          document.getElementById('recruitingOnly').checked = state.recruitingOnly;
+        }
+        if (state.adultPosbl !== undefined && document.getElementById('adultPosbl')) {
+          document.getElementById('adultPosbl').checked = state.adultPosbl;
+        }
+        if (state.youthPosbl !== undefined && document.getElementById('youthPosbl')) {
+          document.getElementById('youthPosbl').checked = state.youthPosbl;
+        }
+        if (state.sidoSelect !== undefined && document.getElementById('sidoSelect')) {
+          document.getElementById('sidoSelect').value = state.sidoSelect;
+        }
+        if (state.locText !== undefined && document.getElementById('locText')) {
+          document.getElementById('locText').value = state.locText;
+        }
+        if (state.includeKwds !== undefined && document.getElementById('includeKwds')) {
+          document.getElementById('includeKwds').value = state.includeKwds;
+        }
+        if (state.excludeKwds !== undefined && document.getElementById('excludeKwds')) {
+          document.getElementById('excludeKwds').value = state.excludeKwds;
+        }
+        if (state.targetDate !== undefined && document.getElementById('targetDate')) {
+          document.getElementById('targetDate').value = state.targetDate;
+        }
+
+        if (state.currentTab) {
+          currentTab = state.currentTab;
+          const btnAll = document.getElementById('tabAll');
+          const btnBm = document.getElementById('tabBookmark');
+          const btnHd = document.getElementById('tabHidden');
+          if (btnAll && btnBm && btnHd) {
+            btnAll.className = 'tab-btn';
+            btnBm.className = 'tab-btn';
+            btnHd.className = 'tab-btn';
+            if (currentTab === 'bookmark') {
+              btnBm.className = 'tab-btn active-bookmark';
+            } else if (currentTab === 'hidden') {
+              btnHd.className = 'tab-btn active-hidden';
+            } else {
+              btnAll.className = 'tab-btn active';
+            }
+          }
+        }
+
+        // Smart Natural Persistence: 키워드/날짜 입력값이 존재하면 토글 스위치 자동 ON 활성화
+        const incVal = document.getElementById('includeKwds')?.value?.trim() || '';
+        const excVal = document.getElementById('excludeKwds')?.value?.trim() || '';
+        const useKwdsEl = document.getElementById('useKwds');
+        if (useKwdsEl) {
+          if (incVal || excVal) {
+            useKwdsEl.checked = true;
+          } else if (state.useKwds !== undefined) {
+            useKwdsEl.checked = state.useKwds;
+          }
+        }
+
+        const dateVal = document.getElementById('targetDate')?.value;
+        const useTargetDateEl = document.getElementById('useTargetDate');
+        if (useTargetDateEl) {
+          if (dateVal) {
+            useTargetDateEl.checked = true;
+          } else if (state.useTargetDate !== undefined) {
+            useTargetDateEl.checked = state.useTargetDate;
+          }
+        }
+
+      } catch (e) {
+        console.error('필터 상태 복원 실패:', e);
+      }
+    }
+
+    function resetFilterConditions() {
+      const rec = document.getElementById('recruitingOnly');
+      if (rec) rec.checked = true;
+
+      const adult = document.getElementById('adultPosbl');
+      if (adult) adult.checked = false;
+
+      const youth = document.getElementById('youthPosbl');
+      if (youth) youth.checked = false;
+
+      const sido = document.getElementById('sidoSelect');
+      if (sido) sido.value = '';
+
+      const loc = document.getElementById('locText');
+      if (loc) loc.value = '';
+
+      const useK = document.getElementById('useKwds');
+      if (useK) useK.checked = true;
+
+      const inc = document.getElementById('includeKwds');
+      if (inc) inc.value = '';
+
+      const exc = document.getElementById('excludeKwds');
+      if (exc) exc.value = '';
+
+      const useD = document.getElementById('useTargetDate');
+      if (useD) useD.checked = true;
+
+      const tgtD = document.getElementById('targetDate');
+      if (tgtD) tgtD.value = '';
+
+      currentTab = 'all';
+      const btnAll = document.getElementById('tabAll');
+      const btnBm = document.getElementById('tabBookmark');
+      const btnHd = document.getElementById('tabHidden');
+      if (btnAll && btnBm && btnHd) {
+        btnAll.className = 'tab-btn active';
+        btnBm.className = 'tab-btn';
+        btnHd.className = 'tab-btn';
+      }
+
+      try {
+        localStorage.removeItem('1365_filter_state');
+      } catch (e) { }
+
+      applyFiltersAndRender(true);
+    }
+    window.resetFilterConditions = resetFilterConditions;
+
+    function resetSortRules() {
+      sortRules = [
+        { id: 'sr_1', field: 'noticeEndde', order: 'asc' }
+      ];
+      const useS = document.getElementById('useSorting');
+      if (useS) useS.checked = true;
+
+      saveSortRules();
+      renderSortBlocks();
+      applyFiltersAndRender(true);
+    }
+    window.resetSortRules = resetSortRules;
+
+    loadFilterState();
 
     // 🔀 Notion-style Dynamic Sort Rules Engine
     const SORT_FIELD_OPTIONS = [
@@ -1555,10 +1767,17 @@
     document.getElementById('syncModalClose').addEventListener('click', closeSyncModal);
 
     function getSyncConfigPackage() {
+      let filterState = null;
+      try {
+        const saved = localStorage.getItem('1365_filter_state');
+        if (saved) filterState = JSON.parse(saved);
+      } catch (e) { }
+
       return {
         b: bookmarks,
         h: hiddenItems,
         s: sortRules,
+        f: filterState,
         t: Date.now()
       };
     }
@@ -1600,11 +1819,11 @@
       if (!file) return;
 
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = function (e) {
         try {
           const config = JSON.parse(e.target.result);
           applySyncPackage(config);
-          alert('🎉 [백업 파일 복원 완료!]\n내 관심목록, 숨김목록, 정렬 설정이 모두 정상적으로 복원되었습니다.');
+          alert('🎉 [백업 파일 복원 완료!]\n내 관심목록, 숨김목록, 정렬 및 필터 설정이 모두 정상적으로 복원되었습니다.');
           closeSyncModal();
         } catch (err) {
           alert('❌ 올바르지 않은 백업 파일 형식입니다.');
@@ -1630,6 +1849,12 @@
         sortRules = config.s;
         saveSortRules();
         renderSortBlocks();
+      }
+      if (config.f) {
+        try {
+          localStorage.setItem('1365_filter_state', JSON.stringify(config.f));
+          loadFilterState();
+        } catch (e) { }
       }
       updateBookmarkCount();
       updateHiddenCount();
@@ -1700,7 +1925,7 @@
       ctx.fillRect(20, 20, 20, 20);
       ctx.fillRect(120, 20, 20, 20);
       ctx.fillRect(20, 120, 20, 20);
-      
+
       // Hash-based matrix pattern rendering
       ctx.fillStyle = '#0f172a';
       let hash = 0;
@@ -1795,7 +2020,7 @@
       } catch (e) { }
 
 
-      
+
       applyFiltersAndRender();
       return true;
     }
@@ -1803,7 +2028,7 @@
     async function reloadStaticData() {
       const btnReload = document.getElementById('btnReload');
       if (btnReload) btnReload.textContent = '🔄 데이터 다시 읽는 중...';
-      
+
       let success = false;
       try {
         const resp = await fetch('./data.json?t=' + Date.now());
@@ -1980,113 +2205,114 @@
     const btnFetchEl = document.getElementById('btnFetch');
     if (btnFetchEl) {
       btnFetchEl.addEventListener('click', async () => {
-      if (window.location.protocol === 'file:') {
-        alert('보안 강화를 위해 http://localhost:3000 프록시 서버로 접속하세요. (.env 키 보호)');
-        return;
-      }
-
-      const btnFetch = document.getElementById('btnFetch');
-      const btnText = document.getElementById('btnText');
-      btnFetch.disabled = true;
-      btnFetch.style.opacity = '0.85';
-      btnText.innerHTML = `<span class="loading-spinner"></span> 1차 수집 중... (최대 10,000건)`;
-
-      try {
-        let allItems = [];
-        let totalCount = 0;
-        let pageNo = 1;
-        const pageSize = 10000;
-        let hasMore = true;
-
-        while (hasMore) {
-          // ⚠️ 2단계의 시/도나 검색어 등은 일체 포함하지 않고, 순수 전국 전체를 수집함!
-          const reqUrl = `/api/volunteer?op=getVltrSearchWordList&numOfRows=${pageSize}&pageNo=${pageNo}`;
-          if (pageNo > 1) {
-            btnText.innerHTML = `<span class="loading-spinner"></span> 잔여 ${totalCount - allItems.length}건 추가 수집 중... (${pageNo}페이지)`;
-          }
-
-          const resp = await fetch(reqUrl);
-          if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-          const text = await resp.text();
-          const parsed = parseXml(text);
-
-          if (pageNo === 1) {
-            totalCount = parseInt(parsed.totalCount, 10) || parsed.items.length;
-          }
-
-          if (parsed.items && parsed.items.length > 0) {
-            allItems = allItems.concat(parsed.items);
-          }
-
-          // 만약 이번 페이지가 10,000건 꽉 찼고, 아직 totalCount에 도달하지 못했다면 다음 페이지 계속 수집!
-          if (parsed.items.length === pageSize && allItems.length < totalCount) {
-            pageNo++;
-          } else {
-            hasMore = false;
-          }
+        if (window.location.protocol === 'file:') {
+          alert('보안 강화를 위해 http://localhost:3000 프록시 서버로 접속하세요. (.env 키 보호)');
+          return;
         }
 
-        // 중복 공고 등록번호 기준 제거
-        const uniqueMap = new Map();
-        allItems.forEach(item => {
-          if (item.progrmRegistNo && !uniqueMap.has(item.progrmRegistNo)) {
-            uniqueMap.set(item.progrmRegistNo, item);
-          }
-        });
-        const finalItems = Array.from(uniqueMap.values());
+        const btnFetch = document.getElementById('btnFetch');
+        const btnText = document.getElementById('btnText');
+        btnFetch.disabled = true;
+        btnFetch.style.opacity = '0.85';
+        btnText.innerHTML = `<span class="loading-spinner"></span> 1차 수집 중... (최대 10,000건)`;
 
-        latestTotalCount = totalCount || finalItems.length;
-        document.getElementById('totalCount').textContent = latestTotalCount.toLocaleString();
-        windowRawData = finalItems;
-
-        // Cache details for currently known bookmarks
-        windowRawData.forEach(item => {
-          if (bookmarks.includes(item.progrmRegistNo)) {
-            bookmarkDetails[item.progrmRegistNo] = item;
-          }
-        });
         try {
-          localStorage.setItem('1365_bookmark_details', JSON.stringify(bookmarkDetails));
-        } catch (e) { }
+          let allItems = [];
+          let totalCount = 0;
+          let pageNo = 1;
+          const pageSize = 10000;
+          let hasMore = true;
 
-        // Save to localStorage for instant F5 restoration
-        try {
-          localStorage.setItem('1365_raw_cache', JSON.stringify({
-            timestamp: Date.now(),
-            totalCount: latestTotalCount,
-            items: finalItems
-          }));
-        } catch (e) {
-          console.warn("Storage cache quota exceeded:", e);
-        }
+          while (hasMore) {
+            // ⚠️ 2단계의 시/도나 검색어 등은 일체 포함하지 않고, 순수 전국 전체를 수집함!
+            const reqUrl = `/api/volunteer?op=getVltrSearchWordList&numOfRows=${pageSize}&pageNo=${pageNo}`;
+            if (pageNo > 1) {
+              btnText.innerHTML = `<span class="loading-spinner"></span> 잔여 ${totalCount - allItems.length}건 추가 수집 중... (${pageNo}페이지)`;
+            }
 
-        btnText.innerHTML = `✅ 전국 ${finalItems.length.toLocaleString()}건 전수 수집 완료`;
-        setTimeout(() => {
-          btnText.innerHTML = `🚀 1365 전국 전체 데이터 1회 수집`;
+            const resp = await fetch(reqUrl);
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            const text = await resp.text();
+            const parsed = parseXml(text);
+
+            if (pageNo === 1) {
+              totalCount = parseInt(parsed.totalCount, 10) || parsed.items.length;
+            }
+
+            if (parsed.items && parsed.items.length > 0) {
+              allItems = allItems.concat(parsed.items);
+            }
+
+            // 만약 이번 페이지가 10,000건 꽉 찼고, 아직 totalCount에 도달하지 못했다면 다음 페이지 계속 수집!
+            if (parsed.items.length === pageSize && allItems.length < totalCount) {
+              pageNo++;
+            } else {
+              hasMore = false;
+            }
+          }
+
+          // 중복 공고 등록번호 기준 제거
+          const uniqueMap = new Map();
+          allItems.forEach(item => {
+            if (item.progrmRegistNo && !uniqueMap.has(item.progrmRegistNo)) {
+              uniqueMap.set(item.progrmRegistNo, item);
+            }
+          });
+          const finalItems = Array.from(uniqueMap.values());
+
+          latestTotalCount = totalCount || finalItems.length;
+          document.getElementById('totalCount').textContent = latestTotalCount.toLocaleString();
+          windowRawData = finalItems;
+
+          // Cache details for currently known bookmarks
+          windowRawData.forEach(item => {
+            if (bookmarks.includes(item.progrmRegistNo)) {
+              bookmarkDetails[item.progrmRegistNo] = item;
+            }
+          });
+          try {
+            localStorage.setItem('1365_bookmark_details', JSON.stringify(bookmarkDetails));
+          } catch (e) { }
+
+          // Save to localStorage for instant F5 restoration
+          try {
+            localStorage.setItem('1365_raw_cache', JSON.stringify({
+              timestamp: Date.now(),
+              totalCount: latestTotalCount,
+              items: finalItems
+            }));
+          } catch (e) {
+            console.warn("Storage cache quota exceeded:", e);
+          }
+
+          btnText.innerHTML = `✅ 전국 ${finalItems.length.toLocaleString()}건 전수 수집 완료`;
+          setTimeout(() => {
+            btnText.innerHTML = `🚀 1365 전국 전체 데이터 1회 수집`;
+            btnFetch.disabled = false;
+            btnFetch.style.opacity = '1';
+          }, 3500);
+
+          applyFiltersAndRender(true);
+        } catch (err) {
+          console.error("Fetch error:", err);
+          btnText.innerHTML = `⚠️ 수집 실패 (다시 시도)`;
           btnFetch.disabled = false;
           btnFetch.style.opacity = '1';
-        }, 3500);
-
-        applyFiltersAndRender(true);
-      } catch (err) {
-        console.error("Fetch error:", err);
-        btnText.innerHTML = `⚠️ 수집 실패 (다시 시도)`;
-        btnFetch.disabled = false;
-        btnFetch.style.opacity = '1';
-        document.getElementById('resultsContainer').innerHTML = `
+          document.getElementById('resultsContainer').innerHTML = `
           <div style="grid-column: 1 / -1; background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.3); padding: 1.5rem; border-radius: 8px; color: #f87171;">
             ⚠️ <strong>전국 데이터 수집 중 오류 발생:</strong> ${err.message}<br>
             잠시 후 다시 [수집] 버튼을 클릭해 주세요.
           </div>
         `;
-      }
-    });
+        }
+      });
     }
 
     // ==========================================
     // 실시간 필터링 (Data Filtering)
     // ==========================================
     function applyFiltersAndRender(resetPage = true) {
+      saveFilterState();
       displayLimit = 20; // Reset pagination limit on filter change
       if (resetPage) currentPage = 1;
       if (windowRawData.length === 0) {
