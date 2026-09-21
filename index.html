@@ -492,18 +492,6 @@
       color: var(--text-main);
     }
 
-    .sort-rank-badge {
-      font-size: 0.72rem;
-      font-weight: 700;
-      padding: 0.15rem 0.4rem;
-      border-radius: 4px;
-      background: rgba(59, 130, 246, 0.15);
-      color: var(--accent-blue);
-      border: 1px solid rgba(59, 130, 246, 0.3);
-      flex-shrink: 0;
-      white-space: nowrap;
-    }
-
     .sort-field-select {
       flex: 1.2;
       min-width: 90px;
@@ -517,17 +505,32 @@
       cursor: pointer;
     }
 
-    .sort-order-select {
-      flex: 1.1;
-      min-width: 85px;
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
+    .sort-order-toggle-btn {
+      background: rgba(59, 130, 246, 0.12);
+      color: var(--accent-blue);
+      border: 1px solid rgba(59, 130, 246, 0.3);
       border-radius: 6px;
-      padding: 0.35rem 0.45rem;
-      color: var(--text-main);
-      font-size: 0.8rem;
-      font-weight: 500;
+      padding: 0.35rem 0.55rem;
+      font-size: 0.78rem;
+      font-weight: 700;
       cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 3.4rem;
+      box-sizing: border-box;
+      gap: 0.2rem;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+      user-select: none;
+      flex-shrink: 0;
+    }
+
+    .sort-order-toggle-btn:hover {
+      background: rgba(59, 130, 246, 0.25);
+      color: #60a5fa;
+      border-color: rgba(59, 130, 246, 0.5);
+      transform: scale(1.03);
     }
 
     .sort-action-btn {
@@ -1581,6 +1584,59 @@
       } catch (e) { }
     }
 
+    function getSortOrderBadgeInfo(rule) {
+      const isTitle = rule.field === 'progrmSj';
+      const isNoticeEnd = rule.field === 'noticeEndde';
+
+      if (isTitle) {
+        if (rule.order === 'asc') {
+          return {
+            text: 'ㄱ ➔ ㅎ',
+            title: 'ㄱ➔ㅎ 가나다순 (클릭 시 하타가순으로 전환)'
+          };
+        } else {
+          return {
+            text: 'ㅎ ➔ ㄱ',
+            title: 'ㅎ➔ㄱ 하타가순 (클릭 시 가나다순으로 전환)'
+          };
+        }
+      } else if (isNoticeEnd) {
+        if (rule.order === 'asc') {
+          return {
+            text: '1 ➔ 9',
+            title: '1➔9 마감 임박순 (빠른 날짜부터 / 클릭 시 마감 여유순으로 전환)'
+          };
+        } else {
+          return {
+            text: '9 ➔ 1',
+            title: '9➔1 마감 여유순 (늦은 날짜부터 / 클릭 시 마감 임박순으로 전환)'
+          };
+        }
+      } else {
+        if (rule.order === 'asc') {
+          return {
+            text: '1 ➔ 9',
+            title: '1➔9 일자 빠른순 (과거➔미래 / 클릭 시 일자 늦은순으로 전환)'
+          };
+        } else {
+          return {
+            text: '9 ➔ 1',
+            title: '9➔1 일자 늦은순 (미래➔과거 / 클릭 시 일자 빠른순으로 전환)'
+          };
+        }
+      }
+    }
+
+    function toggleSortRuleOrder(idx) {
+      autoEnableSorting();
+      if (sortRules[idx]) {
+        sortRules[idx].order = sortRules[idx].order === 'asc' ? 'desc' : 'asc';
+        saveSortRules();
+        renderSortBlocks();
+        applyFiltersAndRender(false);
+      }
+    }
+
     function renderSortBlocks() {
       const container = document.getElementById('sortBlocksList');
       if (!container) return;
@@ -1603,7 +1659,6 @@
       }
 
       container.innerHTML = sortRules.map((rule, idx) => {
-        const rank = idx + 1;
         const isFirst = idx === 0;
         const isLast = idx === sortRules.length - 1;
 
@@ -1611,17 +1666,17 @@
           <option value="${opt.value}" ${opt.value === rule.field ? 'selected' : ''}>${opt.label}</option>
         `).join('');
 
+        const badgeInfo = getSortOrderBadgeInfo(rule);
+
         return `
           <div class="sort-block" draggable="true" data-index="${idx}" id="sortBlock_${rule.id}">
             <div class="sort-drag-handle" title="끌어서 순서 변경 (드래그)">⠿</div>
-            <span class="sort-rank-badge">${rank}차</span>
             <select class="sort-field-select" onchange="updateSortRuleField(${idx}, this.value)">
               ${fieldOptsHtml}
             </select>
-            <select class="sort-order-select" onchange="updateSortRuleOrder(${idx}, this.value)">
-              <option value="asc" ${rule.order === 'asc' ? 'selected' : ''}>오름차순 ⬆️</option>
-              <option value="desc" ${rule.order === 'desc' ? 'selected' : ''}>내림차순 ⬇️</option>
-            </select>
+            <button type="button" class="sort-order-toggle-btn" onclick="toggleSortRuleOrder(${idx})" title="${badgeInfo.title}">
+              <span>${badgeInfo.text}</span>
+            </button>
             <button type="button" class="sort-action-btn" title="위로 이동" ${isFirst ? 'disabled' : ''} onclick="moveSortRule(${idx}, -1)">▲</button>
             <button type="button" class="sort-action-btn" title="아래로 이동" ${isLast ? 'disabled' : ''} onclick="moveSortRule(${idx}, 1)">▼</button>
             <button type="button" class="sort-action-btn btn-delete" title="정렬 기준 삭제" onclick="deleteSortRule(${idx})">✕</button>
@@ -2547,7 +2602,8 @@
       if (useSorting && sortRules.length > 0) {
         const sortSummary = sortRules.map(r => {
           const opt = SORT_FIELD_OPTIONS.find(o => o.value === r.field);
-          return (opt ? opt.label : r.field) + (r.order === 'asc' ? '⬆️' : '⬇️');
+          const badgeInfo = getSortOrderBadgeInfo(r);
+          return `${opt ? opt.label : r.field}(${badgeInfo.text})`;
         }).join(' ➔ ');
         badges.push(`<span class="tag tag-blue">🔀 정렬: ${sortSummary}</span>`);
       }
