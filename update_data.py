@@ -4,7 +4,9 @@ import json
 import urllib.request
 import urllib.parse
 import xml.etree.ElementTree as ET
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
+
+KST = timezone(timedelta(hours=9))
 
 BASE_URL = "https://apis.data.go.kr/1741000/volunteerPartcptnService"
 
@@ -46,7 +48,7 @@ def fetch_page(page_no=1, page_size=10000):
     query_string = urllib.parse.urlencode(params)
     url = f"{BASE_URL}/getVltrSearchWordList?{query_string}"
 
-    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] API 수집 요청 (page {page_no})...")
+    print(f"[{datetime.now(KST).strftime('%Y-%m-%d %H:%M:%S')}] API 수집 요청 (page {page_no})...")
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
     
     try:
@@ -104,7 +106,7 @@ def run_update():
             unique_map[reg_no] = item
     
     final_items = list(unique_map.values())
-    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    now_str = datetime.now(KST).strftime("%Y-%m-%d %H:%M:%S")
 
     output_data = {
         "updatedAt": now_str,

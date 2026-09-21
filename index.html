@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>1365 자원봉사 스마트 탐색기</title>
+  <title>1365 자원봉사 탐색기 (개선판)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -1011,7 +1011,7 @@
         <div class="brand-logo">1365</div>
         <div>
           <div class="brand-title" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-            <span>1365 자원봉사 스마트 탐색기</span>
+            <span>1365 자원봉사 탐색기 (개선판)</span>
             <span style="font-size: 0.72rem; background: var(--accent-blue); color: #ffffff; padding: 0.15rem 0.45rem; border-radius: 4px; font-weight: 700;">v2.0.0 Static</span>
           </div>
           <div class="brand-sub">Area Mapper 엔진 이식 & 브라우저 인메모리 반응형 필터링 & ⭐ 개인화 동기화 지원</div>
@@ -1160,15 +1160,30 @@
 
     <!-- Right Results Panel -->
     <section class="panel panel-results">
-      <div class="results-header">
-        <div>
-          <h2 class="panel-title" id="resultsPanelTitle" style="margin-bottom: 0; border: none; padding: 0;">📊 자원봉사 목록
-          </h2>
-          <div id="resultsCountInfo" style="font-size: 0.825rem; color: var(--text-muted); margin-top: 0.3rem;">
+      <div class="results-header" style="position: relative;">
+        <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+          <h2 class="panel-title" id="resultsPanelTitle" style="margin-bottom: 0; border: none; padding: 0;">📊 자원봉사 목록</h2>
+          <div id="resultsCountInfo" style="font-size: 0.825rem; color: var(--text-muted);">
             원천 수집: <strong id="totalCount" style="color: var(--accent-blue);">0</strong>건 | ⚡ 필터링 적용: <strong
-              id="filteredCount" style="color: var(--accent-emerald); font-size: 1rem;">0</strong>건
+              id="filteredCount" style="color: var(--accent-emerald); font-size: 0.95rem;">0</strong>건
           </div>
-          <div id="activeFilterBadges" style="margin-top: 0.4rem; display: flex; flex-wrap: wrap; gap: 0.3rem;"></div>
+
+          <!-- 1줄 고정 팝오버 트리거 버튼 -->
+          <div id="filterPopoverWrapper" style="position: relative; display: inline-block;">
+            <button id="btnToggleFilterPopover" type="button" class="btn-filter-popover" style="display: none; align-items: center; gap: 0.35rem; padding: 0.2rem 0.55rem; font-size: 0.75rem; font-weight: 600; border-radius: 6px; background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.35); cursor: pointer; transition: all 0.2s;" onclick="toggleFilterPopover(event)">
+              <span>🏷️ 적용 필터 <strong id="activeFilterCount">0</strong>개</span>
+              <span id="popoverArrow">▾</span>
+            </button>
+
+            <!-- 둥둥 뜨는 팝오버 박스 (Floating Overlay) -->
+            <div id="filterPopoverMenu" class="filter-popover-menu" style="display: none; position: absolute; top: calc(100% + 8px); left: 0; z-index: 99; min-width: 260px; max-width: 360px; background: #0f172a; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px; padding: 0.75rem; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.5); backdrop-filter: blur(8px);">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; padding-bottom: 0.4rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                <span style="font-size: 0.78rem; font-weight: 700; color: #f8fafc;">🏷️ 현재 적용된 필터 조건</span>
+                <span style="font-size: 0.75rem; color: var(--text-muted); cursor: pointer; padding: 0.1rem 0.3rem;" onclick="closeFilterPopover()">&times; 닫기</span>
+              </div>
+              <div id="activeFilterBadges" style="display: flex; flex-wrap: wrap; gap: 0.35rem; max-height: 200px; overflow-y: auto;"></div>
+            </div>
+          </div>
         </div>
 
         <div class="results-tabs">
@@ -1621,6 +1636,36 @@
       applyFiltersAndRender(false);
     }
 
+    function toggleFilterPopover(e) {
+      if (e) e.stopPropagation();
+      const menu = document.getElementById('filterPopoverMenu');
+      const arrow = document.getElementById('popoverArrow');
+      if (!menu) return;
+      if (menu.style.display === 'block') {
+        menu.style.display = 'none';
+        if (arrow) arrow.textContent = '▾';
+      } else {
+        menu.style.display = 'block';
+        if (arrow) arrow.textContent = '▴';
+      }
+    }
+    window.toggleFilterPopover = toggleFilterPopover;
+
+    function closeFilterPopover() {
+      const menu = document.getElementById('filterPopoverMenu');
+      const arrow = document.getElementById('popoverArrow');
+      if (menu) menu.style.display = 'none';
+      if (arrow) arrow.textContent = '▾';
+    }
+    window.closeFilterPopover = closeFilterPopover;
+
+    document.addEventListener('click', (e) => {
+      const wrapper = document.getElementById('filterPopoverWrapper');
+      if (wrapper && !wrapper.contains(e.target)) {
+        closeFilterPopover();
+      }
+    });
+
     function checkUrlSync() {
       const params = new URLSearchParams(window.location.search);
       const syncDataStr = params.get('sync') || params.get('config');
@@ -1749,10 +1794,7 @@
         localStorage.setItem('1365_bookmark_details', JSON.stringify(bookmarkDetails));
       } catch (e) { }
 
-      const badgesContainer = document.getElementById('activeFilterBadges');
-      if (badgesContainer) {
-        badgesContainer.innerHTML = `<span class="tag tag-emerald" style="font-weight: 700;">⚡ 정적 데이터 로드 완료 (수집: ${timeFormatted})</span>`;
-      }
+
       
       applyFiltersAndRender();
       return true;
@@ -2260,8 +2302,13 @@
         }
       }
 
+
+
       // Active filter badges
       const badgesContainer = document.getElementById('activeFilterBadges');
+      const btnPopover = document.getElementById('btnToggleFilterPopover');
+      const countElem = document.getElementById('activeFilterCount');
+
       const badges = [];
       if (recruitingOnly) badges.push('<span class="tag tag-blue">✓ 모집중만</span>');
       if (adultPosbl) badges.push('<span class="tag tag-emerald">✓ 성인가능</span>');
@@ -2279,7 +2326,19 @@
         badges.push(`<span class="tag tag-blue">🔀 정렬: ${sortSummary}</span>`);
       }
 
-      badgesContainer.innerHTML = badges.join('');
+      if (badgesContainer) badgesContainer.innerHTML = badges.join('');
+
+      if (btnPopover && countElem) {
+        if (badges.length > 0) {
+          btnPopover.style.display = 'inline-flex';
+          countElem.textContent = badges.length;
+        } else {
+          btnPopover.style.display = 'none';
+          countElem.textContent = '0';
+          closeFilterPopover();
+        }
+      }
+
       renderCardsList();
     }
 
