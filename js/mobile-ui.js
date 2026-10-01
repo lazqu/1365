@@ -45,31 +45,30 @@ function updateActiveFilterBadgeCount() {
 
   let activeCount = 0;
 
-  // 모집중 전용 체크 여부
-  const recruitingOnly = document.getElementById('recruitingOnly');
-  if (recruitingOnly && recruitingOnly.checked) activeCount++;
+  ['recruitingOnly', 'adultPosbl', 'youthPosbl'].forEach((id) => {
+    const checkbox = document.getElementById(id);
+    if (checkbox && checkbox.checked) activeCount++;
+  });
 
-  // 주말 봉사 체크 여부
-  const weekendOnly = document.getElementById('weekendOnly');
-  if (weekendOnly && weekendOnly.checked) activeCount++;
-
-  // 텍스트 검색어
-  const keyword = document.getElementById('searchKeyword');
-  if (keyword && keyword.value.trim() !== '') activeCount++;
-
-  // 시도 / 시군구
   const sido = document.getElementById('sidoSelect');
-  if (sido && sido.value !== 'ALL' && sido.value !== '') activeCount++;
+  if (sido && sido.value) activeCount++;
 
-  const sigungu = document.getElementById('sigunguSelect');
-  if (sigungu && sigungu.value !== 'ALL' && sigungu.value !== '') activeCount++;
+  const location = document.getElementById('locText');
+  if (location && location.value.trim()) activeCount++;
 
-  // 날짜 필터
-  const startDate = document.getElementById('startDate');
-  if (startDate && startDate.value !== '') activeCount++;
+  const useKeywords = document.getElementById('useKwds');
+  if (useKeywords && useKeywords.checked) {
+    ['includeKwds', 'excludeKwds'].forEach((id) => {
+      const input = document.getElementById(id);
+      if (input && input.value.trim()) activeCount++;
+    });
+  }
 
-  const endDate = document.getElementById('endDate');
-  if (endDate && endDate.value !== '') activeCount++;
+  const useTargetDate = document.getElementById('useTargetDate');
+  const targetDate = document.getElementById('targetDate');
+  if (useTargetDate && useTargetDate.checked && targetDate && targetDate.value) {
+    activeCount++;
+  }
 
   if (activeCount > 0) {
     badgeEl.textContent = `(${activeCount})`;
@@ -98,6 +97,6 @@ function initResponsiveResizeHandler() {
   const filterFormInputs = document.querySelectorAll('.panel-sidebar input, .panel-sidebar select');
   filterFormInputs.forEach((input) => {
     input.addEventListener('change', updateActiveFilterBadgeCount);
-    input.addEventListener('keyup', updateActiveFilterBadgeCount);
+    input.addEventListener('input', updateActiveFilterBadgeCount);
   });
 }
