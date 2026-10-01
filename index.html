@@ -380,186 +380,16 @@
     let currentPage = 1;
     let currentFilteredItems = [];
 
-    function updateBookmarkCount() {
-      document.getElementById('bookmarkCount').textContent = bookmarks.length;
-    }
-    updateBookmarkCount();
-
-    function updateHiddenCount() {
-      document.getElementById('hiddenCount').textContent = hiddenItems.length;
-    }
-    updateHiddenCount();
-
-    // 💾 필터 조건 자동 저장 및 복원 (Smart Persistence)
-    function saveFilterState() {
-      try {
-        const state = {
-          recruitingOnly: document.getElementById('recruitingOnly')?.checked || false,
-          adultPosbl: document.getElementById('adultPosbl')?.checked || false,
-          youthPosbl: document.getElementById('youthPosbl')?.checked || false,
-          sidoSelect: document.getElementById('sidoSelect')?.value || '',
-          locText: document.getElementById('locText')?.value || '',
-          useKwds: document.getElementById('useKwds')?.checked || false,
-          includeKwds: document.getElementById('includeKwds')?.value || '',
-          excludeKwds: document.getElementById('excludeKwds')?.value || '',
-          useTargetDate: document.getElementById('useTargetDate')?.checked || false,
-          targetDate: document.getElementById('targetDate')?.value || '',
-          currentTab: currentTab || 'all'
-        };
-        localStorage.setItem('1365_filter_state', JSON.stringify(state));
-      } catch (e) {
-        console.error('필터 상태 저장 실패:', e);
-      }
-    }
-
-    function loadFilterState() {
-      try {
-        const saved = localStorage.getItem('1365_filter_state');
-        if (!saved) return;
-        const state = JSON.parse(saved);
-
-        if (state.recruitingOnly !== undefined && document.getElementById('recruitingOnly')) {
-          document.getElementById('recruitingOnly').checked = state.recruitingOnly;
-        }
-        if (state.adultPosbl !== undefined && document.getElementById('adultPosbl')) {
-          document.getElementById('adultPosbl').checked = state.adultPosbl;
-        }
-        if (state.youthPosbl !== undefined && document.getElementById('youthPosbl')) {
-          document.getElementById('youthPosbl').checked = state.youthPosbl;
-        }
-        if (state.sidoSelect !== undefined && document.getElementById('sidoSelect')) {
-          document.getElementById('sidoSelect').value = state.sidoSelect;
-        }
-        if (state.locText !== undefined && document.getElementById('locText')) {
-          document.getElementById('locText').value = state.locText;
-        }
-        if (state.includeKwds !== undefined && document.getElementById('includeKwds')) {
-          document.getElementById('includeKwds').value = state.includeKwds;
-        }
-        if (state.excludeKwds !== undefined && document.getElementById('excludeKwds')) {
-          document.getElementById('excludeKwds').value = state.excludeKwds;
-        }
-        if (state.targetDate !== undefined && document.getElementById('targetDate')) {
-          document.getElementById('targetDate').value = state.targetDate;
-        }
-
-        if (state.currentTab) {
-          currentTab = state.currentTab;
-          const btnAll = document.getElementById('tabAll');
-          const btnBm = document.getElementById('tabBookmark');
-          const btnHd = document.getElementById('tabHidden');
-          if (btnAll && btnBm && btnHd) {
-            btnAll.className = 'tab-btn';
-            btnBm.className = 'tab-btn';
-            btnHd.className = 'tab-btn';
-            if (currentTab === 'bookmark') {
-              btnBm.className = 'tab-btn active-bookmark';
-            } else if (currentTab === 'hidden') {
-              btnHd.className = 'tab-btn active-hidden';
-            } else {
-              btnAll.className = 'tab-btn active';
-            }
-          }
-        }
-
-        // Smart Natural Persistence: 키워드/날짜 입력값이 존재하면 토글 스위치 자동 ON 활성화
-        const incVal = document.getElementById('includeKwds')?.value?.trim() || '';
-        const excVal = document.getElementById('excludeKwds')?.value?.trim() || '';
-        const useKwdsEl = document.getElementById('useKwds');
-        if (useKwdsEl) {
-          if (incVal || excVal) {
-            useKwdsEl.checked = true;
-          } else if (state.useKwds !== undefined) {
-            useKwdsEl.checked = state.useKwds;
-          }
-        }
-
-        const dateVal = document.getElementById('targetDate')?.value;
-        const useTargetDateEl = document.getElementById('useTargetDate');
-        if (useTargetDateEl) {
-          if (dateVal) {
-            useTargetDateEl.checked = true;
-          } else if (state.useTargetDate !== undefined) {
-            useTargetDateEl.checked = state.useTargetDate;
-          }
-        }
-
-      } catch (e) {
-        console.error('필터 상태 복원 실패:', e);
-      }
-    }
-
-    function resetFilterConditions() {
-      const rec = document.getElementById('recruitingOnly');
-      if (rec) rec.checked = true;
-
-      const adult = document.getElementById('adultPosbl');
-      if (adult) adult.checked = false;
-
-      const youth = document.getElementById('youthPosbl');
-      if (youth) youth.checked = false;
-
-      const sido = document.getElementById('sidoSelect');
-      if (sido) sido.value = '';
-
-      const loc = document.getElementById('locText');
-      if (loc) loc.value = '';
-
-      const useK = document.getElementById('useKwds');
-      if (useK) useK.checked = true;
-
-      const inc = document.getElementById('includeKwds');
-      if (inc) inc.value = '';
-
-      const exc = document.getElementById('excludeKwds');
-      if (exc) exc.value = '';
-
-      const useD = document.getElementById('useTargetDate');
-      if (useD) useD.checked = true;
-
-      const tgtD = document.getElementById('targetDate');
-      if (tgtD) tgtD.value = '';
-
-      currentTab = 'all';
-      const btnAll = document.getElementById('tabAll');
-      const btnBm = document.getElementById('tabBookmark');
-      const btnHd = document.getElementById('tabHidden');
-      if (btnAll && btnBm && btnHd) {
-        btnAll.className = 'tab-btn active';
-        btnBm.className = 'tab-btn';
-        btnHd.className = 'tab-btn';
-      }
-
-      try {
-        localStorage.removeItem('1365_filter_state');
-      } catch (e) { }
-
-      applyFiltersAndRender(true);
-    }
-    window.resetFilterConditions = resetFilterConditions;
-
-    function resetSortRules() {
-      sortRules = [
-        { id: 'sr_1', field: 'noticeEndde', order: 'asc' }
-      ];
-      const useS = document.getElementById('useSorting');
-      if (useS) useS.checked = true;
-
-      saveSortRules();
-      renderSortBlocks();
-      applyFiltersAndRender(true);
-    }
-    window.resetSortRules = resetSortRules;
-
-    loadFilterState();
-
+    // ==========================================
     // 🔀 Notion-style Dynamic Sort Rules Engine
+    // ==========================================
     const SORT_FIELD_OPTIONS = [
       { value: 'noticeEndde', label: '모집마감일' },
       { value: 'noticeBgnde', label: '모집시작일' },
       { value: 'progrmBgnde', label: '봉사시작일' },
       { value: 'progrmEndde', label: '봉사종료일' },
-      { value: 'progrmSj', label: '공고제목' }
+      { value: 'progrmSj', label: '공고제목' },
+      { value: 'nanmmbyNm', label: '모집기관' }
     ];
 
     let sortRules = [
@@ -582,46 +412,35 @@
       } catch (e) { }
     }
 
+    /**
+     * 🌟 [방안 A] 직관적인 한글 명칭 + 화살표 + 실질 의미 레이블 반환
+     */
     function getSortOrderBadgeInfo(rule) {
-      const isTitle = rule.field === 'progrmSj';
       const isNoticeEnd = rule.field === 'noticeEndde';
+      const isNoticeBgnde = rule.field === 'noticeBgnde';
+      const isProgrmBgnde = rule.field === 'progrmBgnde' || rule.field === 'progrmEndde';
+      const isText = rule.field === 'progrmSj' || rule.field === 'nanmmbyNm' || rule.field === 'mnnstNm';
 
-      if (isTitle) {
-        if (rule.order === 'asc') {
-          return {
-            text: 'ㄱ ➔ ㅎ',
-            title: 'ㄱ➔ㅎ 가나다순 (클릭 시 하타가순으로 전환)'
-          };
-        } else {
-          return {
-            text: 'ㅎ ➔ ㄱ',
-            title: 'ㅎ➔ㄱ 하타가순 (클릭 시 가나다순으로 전환)'
-          };
-        }
-      } else if (isNoticeEnd) {
-        if (rule.order === 'asc') {
-          return {
-            text: '1 ➔ 9',
-            title: '1➔9 마감 임박순 (빠른 날짜부터 / 클릭 시 마감 여유순으로 전환)'
-          };
-        } else {
-          return {
-            text: '9 ➔ 1',
-            title: '9➔1 마감 여유순 (늦은 날짜부터 / 클릭 시 마감 임박순으로 전환)'
-          };
-        }
+      if (isNoticeEnd) {
+        return rule.order === 'asc'
+          ? { text: '▲ 마감임박순', title: '현재: 마감임박순 (빠른 마감일부터 표시 / 클릭 시 마감여유순으로 전환)' }
+          : { text: '▼ 마감여유순', title: '현재: 마감여유순 (여유 있는 마감일부터 표시 / 클릭 시 마감임박순으로 전환)' };
+      } else if (isNoticeBgnde) {
+        return rule.order === 'asc'
+          ? { text: '▲ 최신모집순', title: '현재: 최근 모집등록순 (최신 등록 공고부터 표시 / 클릭 시 과거순으로 전환)' }
+          : { text: '▼ 과거모집순', title: '현재: 과거 모집등록순 (이전 등록 공고부터 표시 / 클릭 시 최신순으로 전환)' };
+      } else if (isProgrmBgnde) {
+        return rule.order === 'asc'
+          ? { text: '▲ 활동빠른순', title: '현재: 봉사 시작일 빠른순 (곧 시작하는 봉사부터 표시 / 클릭 시 늦은순으로 전환)' }
+          : { text: '▼ 활동늦은순', title: '현재: 봉사 시작일 늦은순 (나중에 시작하는 봉사부터 표시 / 클릭 시 빠른순으로 전환)' };
+      } else if (isText) {
+        return rule.order === 'asc'
+          ? { text: '▲ 가나다순', title: '현재: 가나다순 (ㄱ➔ㅎ / 클릭 시 역가나다순으로 전환)' }
+          : { text: '▼ 역가나다순', title: '현재: 역가나다순 (ㅎ➔ㄱ / 클릭 시 가나다순으로 전환)' };
       } else {
-        if (rule.order === 'asc') {
-          return {
-            text: '1 ➔ 9',
-            title: '1➔9 일자 빠른순 (과거➔미래 / 클릭 시 일자 늦은순으로 전환)'
-          };
-        } else {
-          return {
-            text: '9 ➔ 1',
-            title: '9➔1 일자 늦은순 (미래➔과거 / 클릭 시 일자 빠른순으로 전환)'
-          };
-        }
+        return rule.order === 'asc'
+          ? { text: '▲ 오름차순', title: '현재: 오름차순 (클릭 시 내림차순으로 전환)' }
+          : { text: '▼ 내림차순', title: '현재: 내림차순 (클릭 시 오름차순으로 전환)' };
       }
     }
 
@@ -783,6 +602,186 @@
       }
     }
 
+    function updateBookmarkCount() {
+      document.getElementById('bookmarkCount').textContent = bookmarks.length;
+    }
+    updateBookmarkCount();
+
+    function updateHiddenCount() {
+      document.getElementById('hiddenCount').textContent = hiddenItems.length;
+    }
+    updateHiddenCount();
+
+    // 💾 필터 조건 자동 저장 및 복원 (Smart Persistence)
+    function saveFilterState() {
+      try {
+        const state = {
+          recruitingOnly: document.getElementById('recruitingOnly')?.checked || false,
+          adultPosbl: document.getElementById('adultPosbl')?.checked || false,
+          youthPosbl: document.getElementById('youthPosbl')?.checked || false,
+          sidoSelect: document.getElementById('sidoSelect')?.value || '',
+          locText: document.getElementById('locText')?.value || '',
+          useKwds: document.getElementById('useKwds')?.checked || false,
+          includeKwds: document.getElementById('includeKwds')?.value || '',
+          excludeKwds: document.getElementById('excludeKwds')?.value || '',
+          useTargetDate: document.getElementById('useTargetDate')?.checked || false,
+          targetDate: document.getElementById('targetDate')?.value || '',
+          currentTab: currentTab || 'all'
+        };
+        localStorage.setItem('1365_filter_state', JSON.stringify(state));
+      } catch (e) {
+        console.error('필터 상태 저장 실패:', e);
+      }
+    }
+
+    function loadFilterState() {
+      try {
+        const saved = localStorage.getItem('1365_filter_state');
+        if (!saved) return;
+        const state = JSON.parse(saved);
+
+        if (state.recruitingOnly !== undefined && document.getElementById('recruitingOnly')) {
+          document.getElementById('recruitingOnly').checked = state.recruitingOnly;
+        }
+        if (state.adultPosbl !== undefined && document.getElementById('adultPosbl')) {
+          document.getElementById('adultPosbl').checked = state.adultPosbl;
+        }
+        if (state.youthPosbl !== undefined && document.getElementById('youthPosbl')) {
+          document.getElementById('youthPosbl').checked = state.youthPosbl;
+        }
+        if (state.sidoSelect !== undefined && document.getElementById('sidoSelect')) {
+          document.getElementById('sidoSelect').value = state.sidoSelect;
+        }
+        if (state.locText !== undefined && document.getElementById('locText')) {
+          document.getElementById('locText').value = state.locText;
+        }
+        if (state.includeKwds !== undefined && document.getElementById('includeKwds')) {
+          document.getElementById('includeKwds').value = state.includeKwds;
+        }
+        if (state.excludeKwds !== undefined && document.getElementById('excludeKwds')) {
+          document.getElementById('excludeKwds').value = state.excludeKwds;
+        }
+        if (state.targetDate !== undefined && document.getElementById('targetDate')) {
+          document.getElementById('targetDate').value = state.targetDate;
+        }
+
+        if (state.currentTab) {
+          currentTab = state.currentTab;
+          const btnAll = document.getElementById('tabAll');
+          const btnBm = document.getElementById('tabBookmark');
+          const btnHd = document.getElementById('tabHidden');
+          if (btnAll && btnBm && btnHd) {
+            btnAll.className = 'tab-btn';
+            btnBm.className = 'tab-btn';
+            btnHd.className = 'tab-btn';
+            if (currentTab === 'bookmark') {
+              btnBm.className = 'tab-btn active-bookmark';
+            } else if (currentTab === 'hidden') {
+              btnHd.className = 'tab-btn active-hidden';
+            } else {
+              btnAll.className = 'tab-btn active';
+            }
+          }
+        }
+
+        // Smart Natural Persistence: 키워드/날짜 입력값이 존재하면 토글 스위치 자동 ON 활성화
+        const incVal = document.getElementById('includeKwds')?.value?.trim() || '';
+        const excVal = document.getElementById('excludeKwds')?.value?.trim() || '';
+        const useKwdsEl = document.getElementById('useKwds');
+        if (useKwdsEl) {
+          if (incVal || excVal) {
+            useKwdsEl.checked = true;
+          } else if (state.useKwds !== undefined) {
+            useKwdsEl.checked = state.useKwds;
+          }
+        }
+
+        const dateVal = document.getElementById('targetDate')?.value;
+        const useTargetDateEl = document.getElementById('useTargetDate');
+        if (useTargetDateEl) {
+          if (dateVal) {
+            useTargetDateEl.checked = true;
+          } else if (state.useTargetDate !== undefined) {
+            useTargetDateEl.checked = state.useTargetDate;
+          }
+        }
+
+      } catch (e) {
+        console.error('필터 상태 복원 실패:', e);
+      }
+    }
+
+    function forceFilterSwitchesOn() {
+      ['useKwds', 'useTargetDate', 'useSorting'].forEach(id => {
+        const toggle = document.getElementById(id);
+        if (toggle) toggle.checked = true;
+      });
+    }
+
+    function resetFilterConditions() {
+      const rec = document.getElementById('recruitingOnly');
+      if (rec) rec.checked = true;
+
+      const adult = document.getElementById('adultPosbl');
+      if (adult) adult.checked = false;
+
+      const youth = document.getElementById('youthPosbl');
+      if (youth) youth.checked = false;
+
+      const sido = document.getElementById('sidoSelect');
+      if (sido) sido.value = '';
+
+      const loc = document.getElementById('locText');
+      if (loc) loc.value = '';
+
+      const useK = document.getElementById('useKwds');
+      if (useK) useK.checked = true;
+
+      const inc = document.getElementById('includeKwds');
+      if (inc) inc.value = '';
+
+      const exc = document.getElementById('excludeKwds');
+      if (exc) exc.value = '';
+
+      const useD = document.getElementById('useTargetDate');
+      if (useD) useD.checked = true;
+
+      const tgtD = document.getElementById('targetDate');
+      if (tgtD) tgtD.value = '';
+
+      currentTab = 'all';
+      const btnAll = document.getElementById('tabAll');
+      const btnBm = document.getElementById('tabBookmark');
+      const btnHd = document.getElementById('tabHidden');
+      if (btnAll && btnBm && btnHd) {
+        btnAll.className = 'tab-btn active';
+        btnBm.className = 'tab-btn';
+        btnHd.className = 'tab-btn';
+      }
+
+      try {
+        localStorage.removeItem('1365_filter_state');
+      } catch (e) { }
+
+      applyFiltersAndRender(true);
+    }
+    window.resetFilterConditions = resetFilterConditions;
+
+    function resetSortRules() {
+      sortRules = [
+        { id: 'sr_1', field: 'noticeEndde', order: 'asc' }
+      ];
+      const useS = document.getElementById('useSorting');
+      if (useS) useS.checked = true;
+
+      saveSortRules();
+      renderSortBlocks();
+      applyFiltersAndRender(true);
+    }
+    window.resetSortRules = resetSortRules;
+
+
+
     function updateSortRuleOrder(idx, newOrder) {
       autoEnableSorting();
       if (sortRules[idx]) {
@@ -909,6 +908,7 @@
           loadFilterState();
         } catch (e) { }
       }
+      forceFilterSwitchesOn();
       updateBookmarkCount();
       updateHiddenCount();
       applyFiltersAndRender(false);
@@ -1003,34 +1003,6 @@
       return updatedAtStr;
     }
 
-    async function reloadStaticData() {
-      const btnReload = document.getElementById('btnReload');
-      if (btnReload) btnReload.textContent = '🔄 데이터 다시 읽는 중...';
-      try {
-        const resp = await fetch('./data.json?t=' + Date.now());
-        if (resp.ok) {
-          const data = await resp.json();
-          const items = data.items || (Array.isArray(data) ? data : []);
-          if (items.length > 0) {
-            windowRawData = items;
-            latestTotalCount = data.totalCount || items.length;
-            document.getElementById('totalCount').textContent = latestTotalCount.toLocaleString();
-            document.getElementById('staticCountBadge').textContent = latestTotalCount.toLocaleString();
-
-            const timeFormatted = formatUpdateTime(data.updatedAt);
-            document.getElementById('staticTimeBadge').textContent = `📅 수집 시각: ${timeFormatted}`;
-
-            const badgesContainer = document.getElementById('activeFilterBadges');
-            badgesContainer.innerHTML = `<span class="tag tag-emerald" style="font-weight: 700;">⚡ 정적 데이터 로드 완료 (수집: ${timeFormatted})</span>`;
-            applyFiltersAndRender();
-          }
-        }
-      } catch (e) {
-        console.warn("Reload error:", e);
-      }
-      if (btnReload) btnReload.textContent = '🔄 데이터 다시 읽기 (새로고침)';
-    }
-
     // ==========================================
     // ⚡ Static-First 데이터 로딩 엔진 (window.STATIC_1365_DATA -> fetch fallback)
     // ==========================================
@@ -1107,6 +1079,10 @@
       }
       return false;
     }
+
+    // Restore persisted controls before the first render can save default values.
+    loadFilterState();
+    forceFilterSwitchesOn();
 
     // Stage 1: Immediate load attempt
     initDataLoad();
@@ -1620,6 +1596,9 @@
       }
 
       renderCardsList();
+      if (typeof updateActiveFilterBadgeCount === 'function') {
+        updateActiveFilterBadgeCount();
+      }
     }
 
     // ⚡ 클라이언트 사이드 0초 인메모리 페이지네이션 컨트롤러

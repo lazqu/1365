@@ -164,7 +164,9 @@
 
   .sort-order-toggle-btn {
     min-height: 38px;
-    width: 3.8rem;
+    width: auto;
+    min-width: 5.4rem;
+    padding: 0.4rem 0.65rem;
     font-size: 0.8rem;
   }
 
