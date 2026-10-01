@@ -48,6 +48,13 @@
   <main>
     <!-- Left Control Panel -->
     <section class="panel panel-sidebar">
+      <button type="button" class="btn-mobile-filter-toggle" id="btnMobileFilterToggle"
+        aria-expanded="false" aria-controls="sidebarContent">
+        <span>🔍 필터 설정 <span id="mobileFilterBadgeCount" class="mobile-filter-count"></span></span>
+        <span class="filter-toggle-icon" id="mobileFilterIcon">▼</span>
+      </button>
+
+      <div class="sidebar-content-wrapper" id="sidebarContent">
       <!-- 원천 데이터 상태 -->
       <div class="panel-title">
         <span>📥 원천 데이터 현황</span>
@@ -70,13 +77,6 @@
         </button>
       </div>
 
-      <!-- 모바일 전용 필터 펼치기/접기 버튼 -->
-      <button type="button" class="btn-mobile-filter-toggle" id="btnMobileFilterToggle" aria-expanded="false">
-        <span>🔍 상세 검색 조건 설정 <span id="mobileFilterBadgeCount" style="font-size: 0.8rem; background: rgba(59, 130, 246, 0.25); color: #93c5fd; padding: 0.1rem 0.4rem; border-radius: 12px; margin-left: 0.2rem; display: none;"></span></span>
-        <span class="filter-toggle-icon" id="mobileFilterIcon">▼</span>
-      </button>
-
-      <div class="filter-content-wrapper" id="mobileFilterContent">
         <!-- 반응형 필터 -->
         <div class="panel-title" style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
           <div style="display: flex; align-items: center; gap: 0.5rem;">
@@ -181,7 +181,7 @@
               <button type="button" class="btn-reset-chip" onclick="resetSortRules()" title="기존 1차 마감일 순으로 정렬 초기화">
                 🔄 정렬 초기화
               </button>
-              <span style="font-size: 0.72rem; color: var(--text-muted);">⠿ 드래그 / ▲▼ 이동</span>
+              <span style="font-size: 0.72rem; color: var(--text-muted);">⠿ 드래그하여 순서 변경</span>
             </div>
             <div id="sortBlocksList" class="sort-blocks-list"></div>
             <button type="button" id="btnAddSort" class="btn-add-sort" onclick="addSortRule()">
@@ -189,13 +189,17 @@
             </button>
           </div>
         </div>
-      </div><!-- /filter-content-wrapper -->
+      </div><!-- /sidebar-content-wrapper -->
     </section>
 
     <!-- Right Results Panel -->
     <section class="panel panel-results">
       <div class="results-header" style="position: relative;">
         <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+          <button type="button" class="btn-desktop-filter-toggle" id="btnDesktopFilterToggle"
+            aria-expanded="true" aria-controls="sidebarContent" aria-label="필터 숨기기" title="필터 숨기기">
+            ◀ 필터
+          </button>
           <h2 class="panel-title" id="resultsPanelTitle" style="margin-bottom: 0; border: none; padding: 0;">📊 자원봉사 목록
           </h2>
           <div id="resultsCountInfo" style="font-size: 0.825rem; color: var(--text-muted);">
@@ -229,8 +233,8 @@
 
         <div class="results-tabs">
           <button class="tab-btn active" id="tabAll">📋 전체 결과</button>
-          <button class="tab-btn" id="tabBookmark">⭐ 관심 목록 (<span id="bookmarkCount">0</span>)</button>
-          <button class="tab-btn" id="tabHidden">🚫 숨김 목록 (<span id="hiddenCount">0</span>)</button>
+          <button class="tab-btn" id="tabBookmark">⭐ 관심 (<span id="bookmarkCount">0</span>)</button>
+          <button class="tab-btn" id="tabHidden">🚫 숨김 (<span id="hiddenCount">0</span>)</button>
         </div>
       </div>
 
@@ -243,10 +247,19 @@
         </div>
       </div>
 
-      <!-- 고정 하단 페이지네이션 바 -->
+      <!-- 목록 하단 페이지네이션 -->
       <div id="paginationContainer" class="pagination-footer" style="display: none;"></div>
     </section>
   </main>
+
+  <div class="floating-scroll-controls" id="floatingScrollControls" aria-label="빠른 스크롤">
+    <button type="button" id="scrollToResultsTop" aria-label="결과 목록 맨 위로" title="결과 목록 맨 위로">
+      <span aria-hidden="true">↑</span>
+    </button>
+    <button type="button" id="scrollToPagination" aria-label="페이지 이동으로" title="페이지 이동으로">
+      <span aria-hidden="true">↓</span>
+    </button>
+  </div>
 
   <!-- Detail Modal -->
   <div class="modal-overlay" id="detailModal">
@@ -391,6 +404,15 @@
       { value: 'progrmSj', label: '공고제목' },
       { value: 'nanmmbyNm', label: '모집기관' }
     ];
+    const SORT_FIELD_COMPACT_LABELS = {
+      noticeEndde: '모집마감',
+      noticeBgnde: '모집시작',
+      progrmBgnde: '활동시작',
+      progrmEndde: '활동종료',
+      progrmSj: '제목',
+      nanmmbyNm: '기관'
+    };
+    let compactSortFieldLabels = window.matchMedia('(max-width: 430px)').matches;
 
     let sortRules = [
       { id: 'sr_1', field: 'noticeEndde', order: 'asc' }
@@ -444,14 +466,16 @@
       }
     }
 
-    function toggleSortRuleOrder(idx) {
-      autoEnableSorting();
-      if (sortRules[idx]) {
-        sortRules[idx].order = sortRules[idx].order === 'asc' ? 'desc' : 'asc';
-        saveSortRules();
-        renderSortBlocks();
-        applyFiltersAndRender(false);
+    function getSortOrderSelectLabels(rule) {
+      if (rule.field === 'noticeEndde') return { asc: '임박순', desc: '여유순' };
+      if (rule.field === 'noticeBgnde') return { asc: '최신순', desc: '과거순' };
+      if (rule.field === 'progrmBgnde' || rule.field === 'progrmEndde') {
+        return { asc: '빠른순', desc: '늦은순' };
       }
+      if (rule.field === 'progrmSj' || rule.field === 'nanmmbyNm' || rule.field === 'mnnstNm') {
+        return { asc: '가나다순', desc: '역가나다' };
+      }
+      return { asc: '오름차순', desc: '내림차순' };
     }
 
     function renderSortBlocks() {
@@ -476,27 +500,25 @@
       }
 
       container.innerHTML = sortRules.map((rule, idx) => {
-        const isFirst = idx === 0;
-        const isLast = idx === sortRules.length - 1;
-
         const fieldOptsHtml = SORT_FIELD_OPTIONS.map(opt => `
-          <option value="${opt.value}" ${opt.value === rule.field ? 'selected' : ''}>${opt.label}</option>
+          <option value="${opt.value}" title="${opt.label}" ${opt.value === rule.field ? 'selected' : ''}>${compactSortFieldLabels ? SORT_FIELD_COMPACT_LABELS[opt.value] : opt.label}</option>
         `).join('');
 
-        const badgeInfo = getSortOrderBadgeInfo(rule);
+        const ascInfo = getSortOrderBadgeInfo({ ...rule, order: 'asc' });
+        const descInfo = getSortOrderBadgeInfo({ ...rule, order: 'desc' });
+        const orderLabels = getSortOrderSelectLabels(rule);
 
         return `
-          <div class="sort-block" draggable="true" data-index="${idx}" id="sortBlock_${rule.id}">
-            <div class="sort-drag-handle" title="끌어서 순서 변경 (드래그)">⠿</div>
-            <select class="sort-field-select" onchange="updateSortRuleField(${idx}, this.value)">
+          <div class="sort-block" data-index="${idx}" id="sortBlock_${rule.id}">
+            <div class="sort-drag-handle" draggable="true" title="끌어서 순서 변경 (드래그)" aria-label="끌어서 정렬 기준 순서 변경">⠿</div>
+            <select class="sort-field-select" aria-label="정렬 기준" onchange="updateSortRuleField(${idx}, this.value)">
               ${fieldOptsHtml}
             </select>
-            <button type="button" class="sort-order-toggle-btn" onclick="toggleSortRuleOrder(${idx})" title="${badgeInfo.title}">
-              <span>${badgeInfo.text}</span>
-            </button>
-            <button type="button" class="sort-action-btn" title="위로 이동" ${isFirst ? 'disabled' : ''} onclick="moveSortRule(${idx}, -1)">▲</button>
-            <button type="button" class="sort-action-btn" title="아래로 이동" ${isLast ? 'disabled' : ''} onclick="moveSortRule(${idx}, 1)">▼</button>
-            <button type="button" class="sort-action-btn btn-delete" title="정렬 기준 삭제" onclick="deleteSortRule(${idx})">✕</button>
+            <select class="sort-order-select" aria-label="정렬 방식" title="정렬 방식 선택" onchange="updateSortRuleOrder(${idx}, this.value)">
+              <option value="asc" title="${ascInfo.title}" ${rule.order === 'asc' ? 'selected' : ''}>${orderLabels.asc}</option>
+              <option value="desc" title="${descInfo.title}" ${rule.order === 'desc' ? 'selected' : ''}>${orderLabels.desc}</option>
+            </select>
+            <button type="button" class="sort-action-btn btn-delete" title="정렬 기준 삭제" aria-label="정렬 기준 삭제" onclick="deleteSortRule(${idx})">✕</button>
           </div>
         `;
       }).join('');
@@ -506,21 +528,27 @@
 
     function initSortBlockDragAndDrop() {
       const blocks = document.querySelectorAll('.sort-block');
+      const handles = document.querySelectorAll('.sort-drag-handle');
       let draggedIdx = null;
 
-      blocks.forEach(block => {
-        block.addEventListener('dragstart', (e) => {
+      handles.forEach(handle => {
+        handle.addEventListener('dragstart', (e) => {
+          const block = handle.closest('.sort-block');
           draggedIdx = parseInt(block.getAttribute('data-index'), 10);
           block.classList.add('dragging');
           e.dataTransfer.effectAllowed = 'move';
           e.dataTransfer.setData('text/plain', draggedIdx);
         });
 
-        block.addEventListener('dragend', () => {
+        handle.addEventListener('dragend', () => {
+          const block = handle.closest('.sort-block');
           block.classList.remove('dragging');
-          blocks.forEach(b => b.classList.remove('drag-over'));
+          blocks.forEach(item => item.classList.remove('drag-over'));
+          draggedIdx = null;
         });
+      });
 
+      blocks.forEach(block => {
         block.addEventListener('dragover', (e) => {
           e.preventDefault();
           e.dataTransfer.dropEffect = 'move';
@@ -575,18 +603,6 @@
     function deleteSortRule(idx) {
       autoEnableSorting();
       sortRules.splice(idx, 1);
-      saveSortRules();
-      renderSortBlocks();
-      applyFiltersAndRender(false);
-    }
-
-    function moveSortRule(idx, dir) {
-      autoEnableSorting();
-      const newIdx = idx + dir;
-      if (newIdx < 0 || newIdx >= sortRules.length) return;
-      const temp = sortRules[idx];
-      sortRules[idx] = sortRules[newIdx];
-      sortRules[newIdx] = temp;
       saveSortRules();
       renderSortBlocks();
       applyFiltersAndRender(false);
@@ -799,6 +815,12 @@
     };
 
     renderSortBlocks();
+
+    const compactSortLabelMedia = window.matchMedia('(max-width: 430px)');
+    compactSortLabelMedia.addEventListener('change', (event) => {
+      compactSortFieldLabels = event.matches;
+      renderSortBlocks();
+    });
 
     // ==========================================
     // 📱 모바일 동기화 & 백업/복원 Engine
@@ -1733,7 +1755,7 @@
           <button class="btn-detail" ${prevDisabled} onclick="goToPage(${currentPage - 1})">◀ 이전</button>
           ${pageBtns}
           <button class="btn-detail" ${nextDisabled} onclick="goToPage(${currentPage + 1})">다음 ▶</button>
-          <span style="font-size: 0.8rem; color: var(--text-muted); margin-left: 0.8rem;">
+          <span class="pagination-summary" style="font-size: 0.8rem; color: var(--text-muted); margin-left: 0.8rem;">
             (${currentPage} / ${totalPages} 페이지, 총 ${currentFilteredItems.length}건)
           </span>
         `;
@@ -1754,9 +1776,17 @@
     function goToPage(page) {
       currentPage = page;
       renderCardsList();
-      const scrollArea = document.querySelector('.results-scroll-area');
-      if (scrollArea) {
+      if (window.matchMedia('(max-width: 1024px)').matches) {
+        const resultsPanel = document.querySelector('.panel-results');
+        if (resultsPanel) {
+          const top = window.scrollY + resultsPanel.getBoundingClientRect().top - 12;
+          window.scrollTo({ top, behavior: 'smooth' });
+        }
+      } else {
+        const scrollArea = document.querySelector('.results-scroll-area');
+        if (scrollArea) {
         scrollArea.scrollTo({ top: 0, behavior: 'smooth' });
+        }
       }
     }
 
