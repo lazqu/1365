@@ -4,16 +4,56 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   initMobileFilterAccordion();
+  initDesktopFilterToggle();
   initResponsiveResizeHandler();
+  initFloatingScrollControls();
   updateActiveFilterBadgeCount();
 });
+
+function initFloatingScrollControls() {
+  const topButton = document.getElementById('scrollToResultsTop');
+  const paginationButton = document.getElementById('scrollToPagination');
+  const resultsHeader = document.querySelector('.results-header');
+  const pagination = document.getElementById('paginationContainer');
+  if (!topButton || !paginationButton || !resultsHeader || !pagination) return;
+
+  const updateVisibility = () => {
+    const isMobile = window.matchMedia('(max-width: 1024px)').matches;
+    const paginationVisible = getComputedStyle(pagination).display !== 'none';
+    const paginationRect = pagination.getBoundingClientRect();
+    const paginationBelowViewport = paginationVisible && paginationRect.top > window.innerHeight;
+    const paginationInViewport = paginationVisible && paginationRect.bottom > 0 && paginationRect.top < window.innerHeight;
+
+    topButton.classList.toggle('is-visible', isMobile && window.scrollY > 300 && !paginationInViewport);
+    paginationButton.classList.toggle('is-visible', isMobile && paginationBelowViewport);
+  };
+
+  topButton.addEventListener('click', () => {
+    const top = window.scrollY + resultsHeader.getBoundingClientRect().top - 12;
+    window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+  });
+
+  paginationButton.addEventListener('click', () => {
+    const top = window.scrollY + pagination.getBoundingClientRect().top - window.innerHeight + pagination.getBoundingClientRect().height + 12;
+    window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+  });
+
+  window.addEventListener('scroll', updateVisibility, { passive: true });
+  window.addEventListener('resize', updateVisibility);
+  new MutationObserver(updateVisibility).observe(pagination, {
+    attributes: true,
+    attributeFilter: ['style'],
+    childList: true
+  });
+  updateVisibility();
+}
 
 /**
  * 모바일 필터 접이식(Accordion) 토글 초기화
  */
 function initMobileFilterAccordion() {
   const toggleBtn = document.getElementById('btnMobileFilterToggle');
-  const filterWrapper = document.getElementById('mobileFilterContent');
+  const filterWrapper = document.getElementById('sidebarContent');
   const toggleIcon = document.getElementById('mobileFilterIcon');
 
   if (!toggleBtn || !filterWrapper) return;
@@ -33,6 +73,21 @@ function initMobileFilterAccordion() {
     }
 
     toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  });
+}
+
+function initDesktopFilterToggle() {
+  const toggleBtn = document.getElementById('btnDesktopFilterToggle');
+  const main = document.querySelector('main');
+  if (!toggleBtn || !main) return;
+
+  toggleBtn.addEventListener('click', () => {
+    const isCollapsed = main.classList.toggle('filters-collapsed');
+    const label = isCollapsed ? '필터 보이기' : '필터 숨기기';
+    toggleBtn.setAttribute('aria-expanded', String(!isCollapsed));
+    toggleBtn.setAttribute('aria-label', label);
+    toggleBtn.title = label;
+    toggleBtn.textContent = isCollapsed ? '☰ 필터' : '◀ 필터';
   });
 }
 
@@ -71,7 +126,7 @@ function updateActiveFilterBadgeCount() {
   }
 
   if (activeCount > 0) {
-    badgeEl.textContent = `(${activeCount})`;
+    badgeEl.textContent = `· 조건 ${activeCount}`;
     badgeEl.style.display = 'inline-block';
   } else {
     badgeEl.textContent = '';
@@ -83,13 +138,37 @@ function updateActiveFilterBadgeCount() {
  * 윈도우 리사이즈 시 데스크톱 ↔ 모바일 전환 스타일 보정
  */
 function initResponsiveResizeHandler() {
-  window.addEventListener('resize', () => {
-    const filterWrapper = document.getElementById('mobileFilterContent');
-    if (!filterWrapper) return;
+  const breakpoint = window.matchMedia('(max-width: 1024px)');
+  let wasStacked = breakpoint.matches;
 
-    if (window.innerWidth > 768) {
-      // 데스크톱 뷰포트 전환 시 아코디언 클래스와 무관하게 필터 보이도록
-      filterWrapper.classList.remove('is-open');
+  const syncLayoutState = (isStacked) => {
+    const main = document.querySelector('main');
+    const sidebarContent = document.getElementById('sidebarContent');
+    const mobileToggle = document.getElementById('btnMobileFilterToggle');
+    const desktopToggle = document.getElementById('btnDesktopFilterToggle');
+    if (!main || !sidebarContent || !mobileToggle || !desktopToggle) return;
+
+    main.classList.remove('filters-collapsed');
+    sidebarContent.classList.remove('is-open');
+    mobileToggle.setAttribute('aria-expanded', 'false');
+    const icon = document.getElementById('mobileFilterIcon');
+    if (icon) {
+      icon.classList.remove('is-open');
+      icon.textContent = '▼';
+    }
+
+    desktopToggle.setAttribute('aria-expanded', 'true');
+    desktopToggle.setAttribute('aria-label', '필터 숨기기');
+    desktopToggle.title = '필터 숨기기';
+    desktopToggle.textContent = '◀ 필터';
+  };
+
+  syncLayoutState(wasStacked);
+
+  window.addEventListener('resize', () => {
+    if (breakpoint.matches !== wasStacked) {
+      wasStacked = breakpoint.matches;
+      syncLayoutState(wasStacked);
     }
   });
 

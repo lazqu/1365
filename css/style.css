@@ -129,6 +129,41 @@ main {
   min-height: 0;
 }
 
+.btn-desktop-filter-toggle {
+  display: none;
+}
+
+@media (min-width: 1025px) {
+  .btn-desktop-filter-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    min-height: 36px;
+    padding: 0.4rem 0.65rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--bg-input);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .btn-desktop-filter-toggle:hover {
+    border-color: var(--accent-blue);
+    color: var(--text-main);
+  }
+
+  main.filters-collapsed {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  main.filters-collapsed > .panel-sidebar {
+    display: none;
+  }
+}
+
 .panel {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
@@ -376,15 +411,22 @@ input[type="date"].form-control::-webkit-calendar-picker-indicator:hover {
 }
 
 .sort-block {
+  display: grid;
+  grid-template-columns: 28px minmax(90px, 1.2fr) minmax(110px, 1fr) 32px;
+  align-items: center;
+  gap: 0.35rem;
+  width: 100%;
+  min-width: 0;
   background: var(--bg-input);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 0.4rem 0.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
   transition: all 0.2s ease;
   user-select: none;
+}
+
+.sort-field-select {
+  min-width: 0;
 }
 
 .sort-block:hover {
@@ -404,6 +446,10 @@ input[type="date"].form-control::-webkit-calendar-picker-indicator:hover {
 }
 
 .sort-drag-handle {
+  grid-column: 1;
+  width: 28px;
+  min-width: 28px;
+  height: 32px;
   cursor: grab;
   color: var(--text-muted);
   font-size: 1rem;
@@ -423,8 +469,10 @@ input[type="date"].form-control::-webkit-calendar-picker-indicator:hover {
 }
 
 .sort-field-select {
-  flex: 1.2;
-  min-width: 90px;
+  grid-column: 2;
+  width: 100%;
+  flex: none;
+  min-width: 0;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 6px;
@@ -435,38 +483,29 @@ input[type="date"].form-control::-webkit-calendar-picker-indicator:hover {
   cursor: pointer;
 }
 
-.sort-order-toggle-btn {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.18), rgba(139, 92, 246, 0.18));
-  color: #93c5fd;
-  border: 1px solid rgba(59, 130, 246, 0.45);
+.sort-order-select {
+  grid-column: 3;
+  width: 100%;
+  flex: none;
+  min-width: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
   border-radius: 6px;
   padding: 0.35rem 0.65rem;
   font-size: 0.78rem;
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: auto;
-  min-width: 5.4rem;
   box-sizing: border-box;
-  gap: 0.25rem;
   white-space: nowrap;
-  transition: all 0.2s ease;
-  user-select: none;
-  flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
-.sort-order-toggle-btn:hover {
-  background: var(--accent-blue);
-  color: #ffffff;
-  border-color: var(--accent-blue);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+.sort-action-btn.btn-delete {
+  flex: 0 0 24px;
 }
 
 .sort-action-btn {
+  grid-column: 4;
   background: transparent;
   border: 1px solid transparent;
   color: var(--text-muted);
@@ -492,6 +531,13 @@ input[type="date"].form-control::-webkit-calendar-picker-indicator:hover {
 .sort-action-btn:disabled {
   opacity: 0.2;
   cursor: not-allowed;
+}
+
+.sort-block :focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+  position: relative;
+  z-index: 1;
 }
 
 .sort-action-btn.btn-delete:hover {
@@ -581,6 +627,10 @@ input[type="date"].form-control::-webkit-calendar-picker-indicator:hover {
   align-items: center;
   gap: 0.4rem;
   z-index: 10;
+}
+
+.pagination-summary {
+  min-width: 0;
 }
 
 /* Custom Scrollbars */
@@ -940,6 +990,7 @@ input[type="date"].form-control::-webkit-calendar-picker-indicator:hover {
   color: #cbd5e1;
   max-height: 250px;
   overflow-y: auto;
+  overflow-wrap: anywhere;
 }
 
 .loading-spinner {
