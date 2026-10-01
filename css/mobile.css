@@ -1,0 +1,259 @@
+/* ==========================================================================
+   📱 1365 자원봉사 탐색기 - Mobile First Responsive & Touch UX Stylesheet
+   ========================================================================== */
+
+/* ── 모바일 전용 토글 버튼 (데스크톱에서는 숨김) ── */
+.btn-mobile-filter-toggle {
+  display: none;
+}
+
+/* ── 모바일 / 태블릿 반응형 레이아웃 (max-width: 1024px) ── */
+@media (max-width: 1024px) {
+  html,
+  body {
+    height: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  body {
+    min-height: 100vh;
+  }
+
+  header {
+    position: sticky;
+    top: 0;
+  }
+
+  main {
+    height: auto;
+    overflow: visible;
+    grid-template-columns: 1fr;
+    padding: 0.85rem;
+    gap: 1rem;
+  }
+
+  .panel-sidebar {
+    height: auto;
+    max-height: none;
+    overflow-y: visible;
+  }
+
+  .panel-results {
+    height: auto;
+    overflow: visible;
+  }
+
+  .results-scroll-area {
+    overflow-y: visible !important;
+    max-height: none !important;
+    padding: 1rem 0 !important;
+  }
+}
+
+/* ── 모바일 전용 상세 터치 UX 및 콤팩트 UI (max-width: 768px) ── */
+@media (max-width: 768px) {
+  /* 1. Header Compact Design */
+  header {
+    padding: 0.6rem 0.85rem;
+  }
+
+  .header-content {
+    gap: 0.5rem;
+  }
+
+  .brand-title {
+    font-size: 1.05rem;
+  }
+
+  .brand-logo {
+    width: 34px;
+    height: 34px;
+    font-size: 1rem;
+    border-radius: 8px;
+  }
+
+  .brand-sub {
+    display: none; /* Hide lengthy subtitle on mobile for screen real estate */
+  }
+
+  .badge-status {
+    padding: 0.2rem 0.55rem;
+    font-size: 0.75rem;
+  }
+
+  /* 2. Mobile Filter Accordion Toggle Button */
+  .btn-mobile-filter-toggle {
+    display: flex !important;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15));
+    border: 1px solid rgba(59, 130, 246, 0.35);
+    color: #60a5fa;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+    user-select: none;
+  }
+
+  .btn-mobile-filter-toggle:active {
+    transform: scale(0.99);
+    background: rgba(59, 130, 246, 0.25);
+  }
+
+  .filter-toggle-icon {
+    font-size: 0.8rem;
+    transition: transform 0.25s ease;
+  }
+
+  .filter-toggle-icon.is-open {
+    transform: rotate(180deg);
+  }
+
+  /* 3. Mobile Filter Content Wrapper (Accordion) */
+  .filter-content-wrapper {
+    display: none; /* Default collapsed on mobile */
+  }
+
+  .filter-content-wrapper.is-open {
+    display: block;
+    margin-top: 1rem;
+    animation: filterExpand 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @keyframes filterExpand {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* 4. Form Row Mobile Adjustments */
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+
+  /* 5. Sort Block Mobile Touch Ergonomics (Finger-friendly 38px+) */
+  .sort-block {
+    padding: 0.55rem 0.65rem;
+    gap: 0.5rem;
+    border-radius: 10px;
+  }
+
+  .sort-drag-handle {
+    font-size: 1.25rem;
+    padding: 0 0.3rem;
+    min-width: 28px;
+    min-height: 38px;
+  }
+
+  .sort-field-select {
+    min-height: 38px;
+    font-size: 0.85rem;
+  }
+
+  .sort-order-toggle-btn {
+    min-height: 38px;
+    width: 3.8rem;
+    font-size: 0.8rem;
+  }
+
+  .sort-action-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 0.9rem;
+    border-radius: 6px;
+  }
+
+  /* 6. Results Header & Tabs Mobile Horizontal Drag/Scroll */
+  .results-header {
+    padding: 0.85rem 1rem;
+    gap: 0.75rem;
+  }
+
+  .results-tabs {
+    width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding: 0.25rem;
+    scrollbar-width: none; /* Hide scrollbar Firefox */
+  }
+
+  .results-tabs::-webkit-scrollbar {
+    display: none; /* Hide scrollbar Chrome/Safari */
+  }
+
+  .tab-btn {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+  }
+
+  /* 7. Card Grid Mobile Responsive */
+  .card-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.85rem;
+  }
+
+  .item-card {
+    padding: 1rem;
+  }
+
+  .item-title {
+    font-size: 0.95rem;
+    padding-right: 4.5rem; /* Ensure space for bookmark & hide buttons */
+  }
+
+  .bookmark-btn,
+  .hide-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  /* 8. Modal Mobile Single Column Grid */
+  .modal-overlay {
+    padding: 0.65rem;
+  }
+
+  .modal-content {
+    padding: 1.25rem 1rem;
+    max-height: 88vh;
+    border-radius: 10px;
+  }
+
+  .modal-title {
+    font-size: 1.1rem;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.6rem;
+    padding: 0.75rem;
+  }
+
+  /* 9. Pagination Touch Safety Zone */
+  .pagination-footer {
+    position: sticky;
+    bottom: 0;
+    padding: 0.65rem 0.85rem;
+    padding-bottom: calc(0.65rem + env(safe-area-inset-bottom, 0px));
+    gap: 0.3rem;
+  }
+
+  .pagination-footer button {
+    min-height: 36px;
+    padding: 0.35rem 0.65rem;
+    font-size: 0.825rem;
+  }
+}
