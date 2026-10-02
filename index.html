@@ -5,7 +5,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>1365 자원봉사 탐색기 (개선판)</title>
-  <title>1365 자원봉사 탐색기 (개선판)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -49,13 +48,6 @@
   <main>
     <!-- Left Control Panel -->
     <section class="panel panel-sidebar">
-      <button type="button" class="btn-mobile-filter-toggle" id="btnMobileFilterToggle"
-        aria-expanded="false" aria-controls="sidebarContent">
-        <span>🔍 필터 설정 <span id="mobileFilterBadgeCount" class="mobile-filter-count"></span></span>
-        <span class="filter-toggle-icon" id="mobileFilterIcon">▼</span>
-      </button>
-
-      <div class="sidebar-content-wrapper" id="sidebarContent">
       <!-- 원천 데이터 상태 -->
       <div class="panel-title">
         <span>📥 원천 데이터 현황</span>
@@ -205,8 +197,7 @@
           </h2>
           <div id="resultsCountInfo" style="font-size: 0.825rem; color: var(--text-muted);">
             원천 수집: <strong id="totalCount" style="color: var(--accent-blue);">0</strong>건 | ⚡ 필터링 적용: <strong
-              id="filteredCount" style="color: var(--accent-emerald); font-size: 0.95rem;">0</strong>건
-              id="filteredCount" style="color: var(--accent-emerald); font-size: 0.95rem;">0</strong>건
+              id="filteredCount" style="color: var(--accent-emerald); font-size: 1rem;">0</strong>건
           </div>
 
           <!-- 1줄 고정 팝오버 트리거 버튼 -->
@@ -403,7 +394,6 @@
       { value: 'noticeBgnde', label: '모집시작일' },
       { value: 'progrmBgnde', label: '봉사시작일' },
       { value: 'progrmEndde', label: '봉사종료일' },
-      { value: 'progrmSj', label: '공고제목' },
       { value: 'nanmmbyNm', label: '모집기관' }
     ];
     const SORT_FIELD_COMPACT_LABELS = {
@@ -411,7 +401,6 @@
       noticeBgnde: '모집시작',
       progrmBgnde: '활동시작',
       progrmEndde: '활동종료',
-      progrmSj: '제목',
       nanmmbyNm: '기관'
     };
     let compactSortFieldLabels = window.matchMedia('(max-width: 430px)').matches;
@@ -424,8 +413,9 @@
       const savedSort = localStorage.getItem('1365_sort_rules');
       if (savedSort) {
         const parsed = JSON.parse(savedSort);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          sortRules = parsed;
+        const validParsed = Array.isArray(parsed) ? parsed.filter(r => r.field !== 'progrmSj') : [];
+        if (validParsed.length > 0) {
+          sortRules = validParsed;
         }
       }
     } catch (e) { }
@@ -442,42 +432,36 @@
     function getSortOrderBadgeInfo(rule) {
       const isNoticeEnd = rule.field === 'noticeEndde';
       const isNoticeBgnde = rule.field === 'noticeBgnde';
-      const isProgrmBgnde = rule.field === 'progrmBgnde' || rule.field === 'progrmEndde';
-      const isText = rule.field === 'progrmSj' || rule.field === 'nanmmbyNm' || rule.field === 'mnnstNm';
+      const isProgrmBgnde = rule.field === 'progrmBgnde';
+      const isProgrmEndde = rule.field === 'progrmEndde';
+      const isText = rule.field === 'nanmmbyNm' || rule.field === 'mnnstNm';
 
+      // 정렬 로직상 asc = 값이 작은(이른) 날짜부터
       if (isNoticeEnd) {
         return rule.order === 'asc'
-          ? { text: '▲ 마감임박순', title: '현재: 마감임박순 (빠른 마감일부터 표시 / 클릭 시 마감여유순으로 전환)' }
-          : { text: '▼ 마감여유순', title: '현재: 마감여유순 (여유 있는 마감일부터 표시 / 클릭 시 마감임박순으로 전환)' };
+          ? { text: '임박 → 여유', title: '현재: 임박 → 여유 (빠른 마감일부터 표시 / 클릭 시 여유 → 임박으로 전환)' }
+          : { text: '여유 → 임박', title: '현재: 여유 → 임박 (여유 있는 마감일부터 표시 / 클릭 시 임박 → 여유로 전환)' };
       } else if (isNoticeBgnde) {
         return rule.order === 'asc'
-          ? { text: '▲ 최신모집순', title: '현재: 최근 모집등록순 (최신 등록 공고부터 표시 / 클릭 시 과거순으로 전환)' }
-          : { text: '▼ 과거모집순', title: '현재: 과거 모집등록순 (이전 등록 공고부터 표시 / 클릭 시 최신순으로 전환)' };
+          ? { text: '일찍 → 늦게', title: '현재: 일찍 → 늦게 (이른 날짜부터 표시 / 클릭 시 늦게 → 일찍으로 전환)' }
+          : { text: '늦게 → 일찍', title: '현재: 늦게 → 일찍 (늦은 날짜부터 표시 / 클릭 시 일찍 → 늦게로 전환)' };
       } else if (isProgrmBgnde) {
         return rule.order === 'asc'
-          ? { text: '▲ 활동빠른순', title: '현재: 봉사 시작일 빠른순 (곧 시작하는 봉사부터 표시 / 클릭 시 늦은순으로 전환)' }
-          : { text: '▼ 활동늦은순', title: '현재: 봉사 시작일 늦은순 (나중에 시작하는 봉사부터 표시 / 클릭 시 빠른순으로 전환)' };
+          ? { text: '일찍 → 늦게', title: '현재: 일찍 → 늦게 (이른 날짜부터 표시 / 클릭 시 늦게 → 일찍으로 전환)' }
+          : { text: '늦게 → 일찍', title: '현재: 늦게 → 일찍 (늦은 날짜부터 표시 / 클릭 시 일찍 → 늦게로 전환)' };
+      } else if (isProgrmEndde) {
+        return rule.order === 'asc'
+          ? { text: '일찍 → 늦게', title: '현재: 일찍 → 늦게 (이른 날짜부터 표시 / 클릭 시 늦게 → 일찍으로 전환)' }
+          : { text: '늦게 → 일찍', title: '현재: 늦게 → 일찍 (늦은 날짜부터 표시 / 클릭 시 일찍 → 늦게로 전환)' };
       } else if (isText) {
         return rule.order === 'asc'
-          ? { text: '▲ 가나다순', title: '현재: 가나다순 (ㄱ➔ㅎ / 클릭 시 역가나다순으로 전환)' }
-          : { text: '▼ 역가나다순', title: '현재: 역가나다순 (ㅎ➔ㄱ / 클릭 시 가나다순으로 전환)' };
+          ? { text: '가나다순', title: '현재: 가나다순 (ㄱ➔ㅎ / 클릭 시 역가나다순으로 전환)' }
+          : { text: '역가나다순', title: '현재: 역가나다순 (ㅎ➔ㄱ / 클릭 시 가나다순으로 전환)' };
       } else {
         return rule.order === 'asc'
-          ? { text: '▲ 오름차순', title: '현재: 오름차순 (클릭 시 내림차순으로 전환)' }
-          : { text: '▼ 내림차순', title: '현재: 내림차순 (클릭 시 오름차순으로 전환)' };
+          ? { text: '오름차순', title: '현재: 오름차순 (클릭 시 내림차순으로 전환)' }
+          : { text: '내림차순', title: '현재: 내림차순 (클릭 시 오름차순으로 전환)' };
       }
-    }
-
-    function getSortOrderSelectLabels(rule) {
-      if (rule.field === 'noticeEndde') return { asc: '임박순', desc: '여유순' };
-      if (rule.field === 'noticeBgnde') return { asc: '최신순', desc: '과거순' };
-      if (rule.field === 'progrmBgnde' || rule.field === 'progrmEndde') {
-        return { asc: '빠른순', desc: '늦은순' };
-      }
-      if (rule.field === 'progrmSj' || rule.field === 'nanmmbyNm' || rule.field === 'mnnstNm') {
-        return { asc: '가나다순', desc: '역가나다' };
-      }
-      return { asc: '오름차순', desc: '내림차순' };
     }
 
     function renderSortBlocks() {
@@ -506,9 +490,8 @@
           <option value="${opt.value}" title="${opt.label}" ${opt.value === rule.field ? 'selected' : ''}>${compactSortFieldLabels ? SORT_FIELD_COMPACT_LABELS[opt.value] : opt.label}</option>
         `).join('');
 
-        const ascInfo = getSortOrderBadgeInfo({ ...rule, order: 'asc' });
-        const descInfo = getSortOrderBadgeInfo({ ...rule, order: 'desc' });
-        const orderLabels = getSortOrderSelectLabels(rule);
+        const orderInfo = getSortOrderBadgeInfo(rule);
+        const nextOrder = rule.order === 'asc' ? 'desc' : 'asc';
 
         return `
           <div class="sort-block" data-index="${idx}" id="sortBlock_${rule.id}">
@@ -516,10 +499,7 @@
             <select class="sort-field-select" aria-label="정렬 기준" onchange="updateSortRuleField(${idx}, this.value)">
               ${fieldOptsHtml}
             </select>
-            <select class="sort-order-select" aria-label="정렬 방식" title="정렬 방식 선택" onchange="updateSortRuleOrder(${idx}, this.value)">
-              <option value="asc" title="${ascInfo.title}" ${rule.order === 'asc' ? 'selected' : ''}>${orderLabels.asc}</option>
-              <option value="desc" title="${descInfo.title}" ${rule.order === 'desc' ? 'selected' : ''}>${orderLabels.desc}</option>
-            </select>
+            <button type="button" class="sort-order-select" aria-label="정렬 방향 전환" title="${orderInfo.title}" onclick="updateSortRuleOrder(${idx}, '${nextOrder}')">${orderInfo.text}</button>
             <button type="button" class="sort-action-btn btn-delete" title="정렬 기준 삭제" aria-label="정렬 기준 삭제" onclick="deleteSortRule(${idx})">✕</button>
           </div>
         `;
@@ -805,6 +785,12 @@
       if (sortRules[idx]) {
         sortRules[idx].order = newOrder;
         saveSortRules();
+        renderSortBlocks();
+        const orderBtn = document.querySelectorAll('.sort-block .sort-order-select')[idx];
+        if (orderBtn) {
+          orderBtn.classList.add('sort-order-flip');
+          orderBtn.focus({ preventScroll: true });
+        }
         applyFiltersAndRender(false);
       }
     }
@@ -922,7 +908,7 @@
         importedH = config.h.length;
       }
       if (Array.isArray(config.s) && config.s.length > 0) {
-        sortRules = config.s;
+        sortRules = config.s.filter(r => r.field !== 'progrmSj');
         saveSortRules();
         renderSortBlocks();
       }
@@ -937,36 +923,6 @@
       updateHiddenCount();
       applyFiltersAndRender(false);
     }
-
-    function toggleFilterPopover(e) {
-      if (e) e.stopPropagation();
-      const menu = document.getElementById('filterPopoverMenu');
-      const arrow = document.getElementById('popoverArrow');
-      if (!menu) return;
-      if (menu.style.display === 'block') {
-        menu.style.display = 'none';
-        if (arrow) arrow.textContent = '▾';
-      } else {
-        menu.style.display = 'block';
-        if (arrow) arrow.textContent = '▴';
-      }
-    }
-    window.toggleFilterPopover = toggleFilterPopover;
-
-    function closeFilterPopover() {
-      const menu = document.getElementById('filterPopoverMenu');
-      const arrow = document.getElementById('popoverArrow');
-      if (menu) menu.style.display = 'none';
-      if (arrow) arrow.textContent = '▾';
-    }
-    window.closeFilterPopover = closeFilterPopover;
-
-    document.addEventListener('click', (e) => {
-      const wrapper = document.getElementById('filterPopoverWrapper');
-      if (wrapper && !wrapper.contains(e.target)) {
-        closeFilterPopover();
-      }
-    });
 
     function toggleFilterPopover(e) {
       if (e) e.stopPropagation();
@@ -1784,10 +1740,10 @@
         const nextDisabled = currentPage === totalPages ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : '';
 
         const paginationHtml = `
-          <button class="btn-detail" ${prevDisabled} onclick="goToPage(${currentPage - 1})">◀ 이전</button>
+          <button class="btn-detail" ${prevDisabled} onclick="goToPage(${currentPage - 1})" aria-label="이전 페이지">◀<span class="page-nav-label"> 이전</span></button>
           ${pageBtns}
           <button class="btn-detail" ${nextDisabled} onclick="goToPage(${currentPage + 1})">다음 ▶</button>
-          <span class="pagination-summary" style="font-size: 0.8rem; color: var(--text-muted); margin-left: 0.8rem;">
+          <span style="font-size: 0.8rem; color: var(--text-muted); margin-left: 0.8rem;">
             (${currentPage} / ${totalPages} 페이지, 총 ${currentFilteredItems.length}건)
           </span>
         `;

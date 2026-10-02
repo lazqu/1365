@@ -498,6 +498,62 @@ input[type="date"].form-control::-webkit-calendar-picker-indicator:hover {
   cursor: pointer;
   box-sizing: border-box;
   white-space: nowrap;
+  font-family: inherit;
+  text-align: center;
+}
+
+.sort-field-select,
+button.sort-order-select {
+  background-color: var(--bg-card-hover);
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  border-radius: 6px;
+  box-sizing: border-box;
+  font-size: 0.8rem;
+  line-height: 1.2;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.sort-field-select,
+.sort-order-select {
+  height: 32px;
+}
+
+.sort-field-select:hover,
+button.sort-order-select:hover {
+  background-color: #3f4f69;
+  border-color: rgba(148, 163, 184, 0.8);
+}
+
+.sort-field-select:active,
+button.sort-order-select:active {
+  background-color: #2b3a52;
+  border-color: rgba(148, 163, 184, 0.8);
+}
+
+button.sort-order-select:active {
+  transform: scale(0.97);
+}
+
+button.sort-order-select.sort-order-flip {
+  animation: sortOrderFade 0.18s ease-out;
+}
+
+@keyframes sortOrderFade {
+  from { color: transparent; }
+  to { color: var(--text-main); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sort-field-select,
+  button.sort-order-select {
+    transition: none;
+  }
+  button.sort-order-select:active {
+    transform: none;
+  }
+  button.sort-order-select.sort-order-flip {
+    animation: none;
+  }
 }
 
 .sort-action-btn.btn-delete {

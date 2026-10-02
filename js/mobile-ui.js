@@ -54,7 +54,6 @@ function initFloatingScrollControls() {
 function initMobileFilterAccordion() {
   const toggleBtn = document.getElementById('btnMobileFilterToggle');
   const filterWrapper = document.getElementById('sidebarContent');
-  const toggleIcon = document.getElementById('mobileFilterIcon');
 
   if (!toggleBtn || !filterWrapper) return;
 
@@ -62,15 +61,8 @@ function initMobileFilterAccordion() {
     e.preventDefault();
     const isOpen = filterWrapper.classList.toggle('is-open');
 
-    if (toggleIcon) {
-      if (isOpen) {
-        toggleIcon.classList.add('is-open');
-        toggleIcon.textContent = '▲';
-      } else {
-        toggleIcon.classList.remove('is-open');
-        toggleIcon.textContent = '▼';
-      }
-    }
+    const stateText = document.getElementById('mobileFilterStateText');
+    if (stateText) stateText.textContent = isOpen ? '접기' : '펼치기';
 
     toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
   });
@@ -151,11 +143,8 @@ function initResponsiveResizeHandler() {
     main.classList.remove('filters-collapsed');
     sidebarContent.classList.remove('is-open');
     mobileToggle.setAttribute('aria-expanded', 'false');
-    const icon = document.getElementById('mobileFilterIcon');
-    if (icon) {
-      icon.classList.remove('is-open');
-      icon.textContent = '▼';
-    }
+    const stateText = document.getElementById('mobileFilterStateText');
+    if (stateText) stateText.textContent = '펼치기';
 
     desktopToggle.setAttribute('aria-expanded', 'true');
     desktopToggle.setAttribute('aria-label', '필터 숨기기');
