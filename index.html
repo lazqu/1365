@@ -51,7 +51,7 @@
       <button type="button" class="btn-mobile-filter-toggle" id="btnMobileFilterToggle"
         aria-expanded="false" aria-controls="sidebarContent">
         <span>🔍 필터 설정 <span id="mobileFilterBadgeCount" class="mobile-filter-count"></span></span>
-        <span class="filter-toggle-icon" id="mobileFilterIcon">▼</span>
+        <span class="filter-toggle-state"><span id="mobileFilterStateText">펼치기</span><span class="filter-toggle-icon" id="mobileFilterIcon" aria-hidden="true"></span></span>
       </button>
 
       <div class="sidebar-content-wrapper" id="sidebarContent">
@@ -1747,9 +1747,9 @@
         const nextDisabled = currentPage === totalPages ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : '';
 
         const paginationHtml = `
-          <button class="btn-detail" ${prevDisabled} onclick="goToPage(${currentPage - 1})">◀ 이전</button>
+          <button class="btn-detail" ${prevDisabled} onclick="goToPage(${currentPage - 1})" aria-label="이전 페이지">◀<span class="page-nav-label"> 이전</span></button>
           ${pageBtns}
-          <button class="btn-detail" ${nextDisabled} onclick="goToPage(${currentPage + 1})">다음 ▶</button>
+          <button class="btn-detail" ${nextDisabled} onclick="goToPage(${currentPage + 1})" aria-label="다음 페이지"><span class="page-nav-label">다음 </span>▶</button>
           <span class="pagination-summary" style="font-size: 0.8rem; color: var(--text-muted); margin-left: 0.8rem;">
             (${currentPage} / ${totalPages} 페이지, 총 ${currentFilteredItems.length}건)
           </span>

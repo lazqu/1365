@@ -135,14 +135,52 @@
     cursor: pointer;
   }
 
+  .filter-toggle-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex: 0 0 auto;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  /* 회전 대신 상태별 글리프 교체: 접힘 ▼ / 펼침 ▲ */
   .filter-toggle-icon {
     flex: 0 0 auto;
     font-size: 0.8rem;
-    transition: transform 0.25s ease;
+    line-height: 1;
   }
 
-  .filter-toggle-icon.is-open {
-    transform: rotate(180deg);
+  .filter-toggle-icon::before {
+    content: '▼';
+  }
+
+  .btn-mobile-filter-toggle[aria-expanded="true"] {
+    background: rgba(59, 130, 246, 0.3);
+    border-color: rgba(96, 165, 250, 0.85);
+    color: #bfdbfe;
+    border-radius: 10px 10px 0 0;
+    box-shadow: none;
+  }
+
+  .btn-mobile-filter-toggle[aria-expanded="true"] .filter-toggle-state {
+    color: #bfdbfe;
+  }
+
+  .btn-mobile-filter-toggle[aria-expanded="true"] .filter-toggle-icon::before {
+    content: '▲';
+  }
+
+  .mobile-filter-count {
+    display: none;
+    margin-left: 0.35rem;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    background: rgba(59, 130, 246, 0.3);
+    color: #dbeafe;
+    font-size: 0.72rem;
+    font-weight: 700;
   }
 
   .sidebar-content-wrapper {
@@ -151,8 +189,19 @@
 
   .sidebar-content-wrapper.is-open {
     display: block;
-    margin-top: 1rem;
+    margin-top: 0;
+    padding: 0.9rem 0.75rem 0.75rem;
+    border: 1px solid rgba(96, 165, 250, 0.85);
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    background: rgba(15, 23, 42, 0.35);
     animation: filterExpand 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sidebar-content-wrapper.is-open {
+      animation: none;
+    }
   }
 
   @keyframes filterExpand {
@@ -261,15 +310,6 @@
   .btn-mobile-filter-toggle:active {
     transform: scale(0.99);
     background: rgba(59, 130, 246, 0.25);
-  }
-
-  .filter-toggle-icon {
-    font-size: 0.8rem;
-    transition: transform 0.25s ease;
-  }
-
-  .filter-toggle-icon.is-open {
-    transform: rotate(180deg);
   }
 
   @keyframes filterExpand {
@@ -386,6 +426,10 @@
     min-height: 36px;
     padding: 0.35rem 0.65rem;
     font-size: 0.825rem;
+  }
+
+  .page-nav-label {
+    display: none;
   }
 
 }
