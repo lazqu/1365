@@ -401,7 +401,6 @@
       { value: 'noticeBgnde', label: '모집시작일' },
       { value: 'progrmBgnde', label: '봉사시작일' },
       { value: 'progrmEndde', label: '봉사종료일' },
-      { value: 'progrmSj', label: '공고제목' },
       { value: 'nanmmbyNm', label: '모집기관' }
     ];
     const SORT_FIELD_COMPACT_LABELS = {
@@ -409,7 +408,6 @@
       noticeBgnde: '모집시작',
       progrmBgnde: '활동시작',
       progrmEndde: '활동종료',
-      progrmSj: '제목',
       nanmmbyNm: '기관'
     };
     let compactSortFieldLabels = window.matchMedia('(max-width: 430px)').matches;
@@ -422,8 +420,9 @@
       const savedSort = localStorage.getItem('1365_sort_rules');
       if (savedSort) {
         const parsed = JSON.parse(savedSort);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          sortRules = parsed;
+        const validParsed = Array.isArray(parsed) ? parsed.filter(r => r.field !== 'progrmSj') : [];
+        if (validParsed.length > 0) {
+          sortRules = validParsed;
         }
       }
     } catch (e) { }
@@ -440,42 +439,36 @@
     function getSortOrderBadgeInfo(rule) {
       const isNoticeEnd = rule.field === 'noticeEndde';
       const isNoticeBgnde = rule.field === 'noticeBgnde';
-      const isProgrmBgnde = rule.field === 'progrmBgnde' || rule.field === 'progrmEndde';
-      const isText = rule.field === 'progrmSj' || rule.field === 'nanmmbyNm' || rule.field === 'mnnstNm';
+      const isProgrmBgnde = rule.field === 'progrmBgnde';
+      const isProgrmEndde = rule.field === 'progrmEndde';
+      const isText = rule.field === 'nanmmbyNm' || rule.field === 'mnnstNm';
 
+      // 정렬 로직상 asc = 값이 작은(이른) 날짜부터
       if (isNoticeEnd) {
         return rule.order === 'asc'
-          ? { text: '▲ 마감임박순', title: '현재: 마감임박순 (빠른 마감일부터 표시 / 클릭 시 마감여유순으로 전환)' }
-          : { text: '▼ 마감여유순', title: '현재: 마감여유순 (여유 있는 마감일부터 표시 / 클릭 시 마감임박순으로 전환)' };
+          ? { text: '임박 → 여유', title: '현재: 임박 → 여유 (빠른 마감일부터 표시 / 클릭 시 여유 → 임박으로 전환)' }
+          : { text: '여유 → 임박', title: '현재: 여유 → 임박 (여유 있는 마감일부터 표시 / 클릭 시 임박 → 여유로 전환)' };
       } else if (isNoticeBgnde) {
         return rule.order === 'asc'
-          ? { text: '▲ 최신모집순', title: '현재: 최근 모집등록순 (최신 등록 공고부터 표시 / 클릭 시 과거순으로 전환)' }
-          : { text: '▼ 과거모집순', title: '현재: 과거 모집등록순 (이전 등록 공고부터 표시 / 클릭 시 최신순으로 전환)' };
+          ? { text: '일찍 → 늦게', title: '현재: 일찍 → 늦게 (이른 날짜부터 표시 / 클릭 시 늦게 → 일찍으로 전환)' }
+          : { text: '늦게 → 일찍', title: '현재: 늦게 → 일찍 (늦은 날짜부터 표시 / 클릭 시 일찍 → 늦게로 전환)' };
       } else if (isProgrmBgnde) {
         return rule.order === 'asc'
-          ? { text: '▲ 활동빠른순', title: '현재: 봉사 시작일 빠른순 (곧 시작하는 봉사부터 표시 / 클릭 시 늦은순으로 전환)' }
-          : { text: '▼ 활동늦은순', title: '현재: 봉사 시작일 늦은순 (나중에 시작하는 봉사부터 표시 / 클릭 시 빠른순으로 전환)' };
+          ? { text: '일찍 → 늦게', title: '현재: 일찍 → 늦게 (이른 날짜부터 표시 / 클릭 시 늦게 → 일찍으로 전환)' }
+          : { text: '늦게 → 일찍', title: '현재: 늦게 → 일찍 (늦은 날짜부터 표시 / 클릭 시 일찍 → 늦게로 전환)' };
+      } else if (isProgrmEndde) {
+        return rule.order === 'asc'
+          ? { text: '일찍 → 늦게', title: '현재: 일찍 → 늦게 (이른 날짜부터 표시 / 클릭 시 늦게 → 일찍으로 전환)' }
+          : { text: '늦게 → 일찍', title: '현재: 늦게 → 일찍 (늦은 날짜부터 표시 / 클릭 시 일찍 → 늦게로 전환)' };
       } else if (isText) {
         return rule.order === 'asc'
-          ? { text: '▲ 가나다순', title: '현재: 가나다순 (ㄱ➔ㅎ / 클릭 시 역가나다순으로 전환)' }
-          : { text: '▼ 역가나다순', title: '현재: 역가나다순 (ㅎ➔ㄱ / 클릭 시 가나다순으로 전환)' };
+          ? { text: '가나다순', title: '현재: 가나다순 (ㄱ➔ㅎ / 클릭 시 역가나다순으로 전환)' }
+          : { text: '역가나다순', title: '현재: 역가나다순 (ㅎ➔ㄱ / 클릭 시 가나다순으로 전환)' };
       } else {
         return rule.order === 'asc'
-          ? { text: '▲ 오름차순', title: '현재: 오름차순 (클릭 시 내림차순으로 전환)' }
-          : { text: '▼ 내림차순', title: '현재: 내림차순 (클릭 시 오름차순으로 전환)' };
+          ? { text: '오름차순', title: '현재: 오름차순 (클릭 시 내림차순으로 전환)' }
+          : { text: '내림차순', title: '현재: 내림차순 (클릭 시 오름차순으로 전환)' };
       }
-    }
-
-    function getSortOrderSelectLabels(rule) {
-      if (rule.field === 'noticeEndde') return { asc: '임박순', desc: '여유순' };
-      if (rule.field === 'noticeBgnde') return { asc: '최신순', desc: '과거순' };
-      if (rule.field === 'progrmBgnde' || rule.field === 'progrmEndde') {
-        return { asc: '빠른순', desc: '늦은순' };
-      }
-      if (rule.field === 'progrmSj' || rule.field === 'nanmmbyNm' || rule.field === 'mnnstNm') {
-        return { asc: '가나다순', desc: '역가나다' };
-      }
-      return { asc: '오름차순', desc: '내림차순' };
     }
 
     function renderSortBlocks() {
@@ -504,9 +497,8 @@
           <option value="${opt.value}" title="${opt.label}" ${opt.value === rule.field ? 'selected' : ''}>${compactSortFieldLabels ? SORT_FIELD_COMPACT_LABELS[opt.value] : opt.label}</option>
         `).join('');
 
-        const ascInfo = getSortOrderBadgeInfo({ ...rule, order: 'asc' });
-        const descInfo = getSortOrderBadgeInfo({ ...rule, order: 'desc' });
-        const orderLabels = getSortOrderSelectLabels(rule);
+        const orderInfo = getSortOrderBadgeInfo(rule);
+        const nextOrder = rule.order === 'asc' ? 'desc' : 'asc';
 
         return `
           <div class="sort-block" data-index="${idx}" id="sortBlock_${rule.id}">
@@ -514,10 +506,7 @@
             <select class="sort-field-select" aria-label="정렬 기준" onchange="updateSortRuleField(${idx}, this.value)">
               ${fieldOptsHtml}
             </select>
-            <select class="sort-order-select" aria-label="정렬 방식" title="정렬 방식 선택" onchange="updateSortRuleOrder(${idx}, this.value)">
-              <option value="asc" title="${ascInfo.title}" ${rule.order === 'asc' ? 'selected' : ''}>${orderLabels.asc}</option>
-              <option value="desc" title="${descInfo.title}" ${rule.order === 'desc' ? 'selected' : ''}>${orderLabels.desc}</option>
-            </select>
+            <button type="button" class="sort-order-select" aria-label="정렬 방향 전환" title="${orderInfo.title}" onclick="updateSortRuleOrder(${idx}, '${nextOrder}')">${orderInfo.text}</button>
             <button type="button" class="sort-action-btn btn-delete" title="정렬 기준 삭제" aria-label="정렬 기준 삭제" onclick="deleteSortRule(${idx})">✕</button>
           </div>
         `;
@@ -803,6 +792,12 @@
       if (sortRules[idx]) {
         sortRules[idx].order = newOrder;
         saveSortRules();
+        renderSortBlocks();
+        const orderBtn = document.querySelectorAll('.sort-block .sort-order-select')[idx];
+        if (orderBtn) {
+          orderBtn.classList.add('sort-order-flip');
+          orderBtn.focus({ preventScroll: true });
+        }
         applyFiltersAndRender(false);
       }
     }
@@ -920,7 +915,7 @@
         importedH = config.h.length;
       }
       if (Array.isArray(config.s) && config.s.length > 0) {
-        sortRules = config.s;
+        sortRules = config.s.filter(r => r.field !== 'progrmSj');
         saveSortRules();
         renderSortBlocks();
       }
