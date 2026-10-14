@@ -8,7 +8,7 @@ on:
 
 jobs:
   update-volunteer-data:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
 
@@ -25,6 +25,15 @@ jobs:
         env:
           SERVICE_KEY: ${{ secrets.SERVICE_KEY }}
         run: python update_data.py
+
+      - name: 오류 진단 파일 보관
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: api-response-diagnostics
+          path: diagnostics/
+          if-no-files-found: ignore
+          retention-days: 7
 
       - name: 변경사항 Git 커밋 & 푸시
         run: |

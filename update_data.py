@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import json
 import time
@@ -12,6 +13,37 @@ KST = timezone(timedelta(hours=9))
 
 BASE_URL = "https://apis.data.go.kr/1741000/volunteerPartcptnService"
 MAX_ATTEMPTS = 3
+# XML 1.0 permits tab, LF, CR, U+0020–D7FF, U+E000–FFFD and
+# U+10000–10FFFF. Replace only characters outside these ranges.
+INVALID_XML_CHARS = re.compile(
+    r"[^\x09\x0A\x0D\x20-\uD7FF\uE000-\uFFFD\U00010000-\U0010FFFF]"
+)
+
+
+def save_response_diagnostics(raw_data, headers, status, error, page_no, attempt):
+    """Keep the original response and bounded context without logging its URL/key."""
+    directory = os.path.join(os.path.dirname(__file__), "diagnostics")
+    os.makedirs(directory, exist_ok=True)
+    name = f"{datetime.now(KST).strftime('%Y%m%d_%H%M%S_%f')}_page{page_no}_attempt{attempt}"
+    base = os.path.join(directory, name)
+    with open(base + ".bin", "wb") as f:
+        f.write(raw_data)
+    details = {"page": page_no, "attempt": attempt, "status": status,
+               "headers": headers, "byteLength": len(raw_data), "error": str(error)}
+    if isinstance(error, ET.ParseError):
+        line, column = error.position
+        # Match ElementTree's line counting, including CR/CRLF normalization.
+        text = raw_data.decode("utf-8").replace("\r\n", "\n").replace("\r", "\n")
+        lines = text.split("\n")
+        context = lines[line - 1][max(0, column - 100):column + 100]
+        details.update(line=line, column=column, contextRepr=repr(context),
+                       contextUtf8Hex=context.encode("utf-8").hex(" "))
+    elif isinstance(error, UnicodeDecodeError):
+        details.update(byteOffset=error.start,
+                       contextHex=raw_data[max(0, error.start - 50):error.end + 50].hex(" "))
+    with open(base + ".json", "w", encoding="utf-8") as f:
+        json.dump(details, f, ensure_ascii=False, indent=2)
+    print(f"[WARN] 원본 응답 및 진단 정보 저장: {base}.bin / .json", file=sys.stderr)
 
 def load_env():
     """.env 파일에서 환경변수 로드"""
@@ -56,8 +88,23 @@ def fetch_page(page_no=1, page_size=10000):
         print(f"[{datetime.now(KST).strftime('%Y-%m-%d %H:%M:%S')}] API 수집 요청 (page {page_no}, 시도 {attempt}/{MAX_ATTEMPTS})...")
         try:
             with urllib.request.urlopen(req, timeout=45) as response:
-                xml_data = response.read().decode("utf-8")
-            root = ET.fromstring(xml_data)
+                raw_data = response.read()
+                response_headers = dict(response.headers.items()) if hasattr(response, "headers") else {}
+                response_status = getattr(response, "status", None)
+            try:
+                xml_data = raw_data.decode("utf-8")
+                xml_data, control_count = INVALID_XML_CHARS.subn(" ", xml_data)
+                if control_count:
+                    print(
+                        f"[WARN] page {page_no}: XML 금지 문자 {control_count}개를 스페이스(U+0020)로 치환했습니다.",
+                        file=sys.stderr,
+                    )
+                root = ET.fromstring(xml_data)
+            except (ET.ParseError, UnicodeDecodeError) as e:
+                save_response_diagnostics(
+                    raw_data, response_headers, response_status, e, page_no, attempt
+                )
+                raise
 
             header = root.find("header")
             if header is None:
@@ -76,20 +123,34 @@ def fetch_page(page_no=1, page_size=10000):
                 raise RuntimeError("API 응답에서 totalCount 또는 items를 찾을 수 없습니다.")
 
             total_count = int(total_count_str)
+            if total_count < 0:
+                raise ValueError("API totalCount는 음수일 수 없습니다.")
             items = [xml_to_dict(item_node) for item_node in items_node.findall("item")]
             return items, total_count
+        except (RuntimeError, ValueError) as e:
+            # API error codes, missing fields and invalid totalCount are not
+            # transient: preserve the response and keep the original failure.
+            save_response_diagnostics(
+                raw_data, response_headers, response_status, e, page_no, attempt
+            )
+            raise
         except urllib.error.HTTPError as e:
+            with e:
+                save_response_diagnostics(
+                    e.read(), dict(e.headers.items()) if e.headers else {}, e.code,
+                    RuntimeError(f"API HTTP Error {e.code}: {e.reason}"), page_no, attempt,
+                )
             if e.code != 429 and not 500 <= e.code < 600:
                 raise RuntimeError(f"API HTTP Error {e.code}: {e.reason}") from e
             error = e
-        except (urllib.error.URLError, OSError) as e:
+        except (urllib.error.URLError, OSError, ET.ParseError, UnicodeDecodeError) as e:
             error = e
 
         if attempt == MAX_ATTEMPTS:
             raise RuntimeError(f"페이지 {page_no} 수집 실패 ({MAX_ATTEMPTS}회 시도): {error}") from error
 
         delay = 2 ** (attempt - 1)
-        print(f"[WARN] 일시적인 네트워크 오류: {error}. {delay}초 후 재시도합니다.", file=sys.stderr)
+        print(f"[WARN] API 응답 수집/파싱 오류: {error}. {delay}초 후 재시도합니다.", file=sys.stderr)
         time.sleep(delay)
 
 def run_update():
