@@ -1,5 +1,5 @@
 window.STATIC_1365_DATA = {
-  "updatedAt": "2026-11-01 09:06:32",
+  "updatedAt": "2026-11-01 20:14:43",
   "totalCount": 8894,
   "items": [
     {
